@@ -1,5 +1,9 @@
 using ApproxTools
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+const OldFloats = (Float32,Float64, Complex64, Complex128)
+const Floats = (OldFloats..., BigFloat, Complex{BigFloat})
+
+include("base.jl")
+include("bary.jl")
+include("chebyshev.jl")
