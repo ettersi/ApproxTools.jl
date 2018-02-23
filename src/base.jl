@@ -78,7 +78,7 @@ map2refinterval(a,b) = AffineTransform(2/(b-a),-(b+a)/(b-a))
 struct AffineTransform{T}
     forward::NTuple{2,T}
     backward::NTuple{2,T}
-    AffineTransform{T}(m,b) where {T} = new((m,b),(1/m,-b/m))
+    AffineTransform{T}(m,b) where {T} = new((m,b),(inv(m),-m\b))
 end
 AffineTransform(m::T,b::T) where {T} = AffineTransform{T}(m,b)
 AffineTransform(m,b) = AffineTransform(promote(m,b)...)
