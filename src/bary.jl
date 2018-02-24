@@ -1,60 +1,30 @@
 using IterTools
 
-
 """
-    geometric_mean_distance(x)
+    baryweights(x [,y])
 
-Compute the geometric mean distance between the points `x`.
+Compute the barycentric weights for interpolation points `x` and poles `y`.
 
-# Examples
-
-```jldoctest
-julia> x = rand(3);
-julia> geometric_mean_distance(x) ≈ abs( (x[1]-x[2])*(x[1]-x[3])*(x[2]-x[3]) )^(1/3)
-true
-"""
-function geometric_mean_distance(x)
-    if length(x) <= 1
-        return one(typeof(geometric_mean_distance(zeros(eltype(x),2))))
-    else
-        n = length(x)
-        return exp(sum(log(abs(x[i]-x[j])) for (i,j) in subsets(1:n,2))*2/(n*(n-1)))
-    end
-end
-
-"""
-    baryweights(x)
-
-Compute the barycentric weights associated with the interpolation points `x`.
-
-More precisely, this function computes the scaled weights `w̃ = w/d^(n-1)`
-where `d = geometric_mean_distance(x)`. This rescaling prevents over- or
+More precisely, this function computes the scaled weights `w̃ = w/c`
+where `c = exp(mean(log(abs(w)))`. This rescaling prevents over- or
 underflow but does not change the result of the barycentric interpolation
 formula.
 """
-function baryweights(x)
-    # Following baryWeights.m from Chebfun.
-    @assert length(x) > 0
+function baryweights(x,y = Vector{eltype(x)}(0))
     n = length(x)
-    x /= geometric_mean_distance(x)
-    w = Vector{eltype(x)}(n)
-    for i = 1:n 
-        s = one(sign(x[1]-x[1]))
-        l = zero(log(abs(x[1]-x[1])))
-        @inbounds for j = 1:n
-            j == i && continue
-            s *=    sign(x[i]-x[j])
-            l += log(abs(x[i]-x[j]))
-        end
-        w[i] = s*exp(-l)
+    s = Vector{float(promote_type(eltype(x),eltype(y)))}(n)
+    l = Vector{float(promote_type(eltype(x),eltype(y)))}(n)
+    for i = 1:n
+        s[i] = conj(prod(sign.(x[i] - x[[1:i-1;i+1:n]]))) * prod(sign.(x[i] - y))
+        l[i] = -sum(log.(abs.(x[i] - x[[1:i-1;i+1:n]]))) + sum(log.(abs.(x[i] - y)))
     end
-    return w
+    return @. s*exp(l - $mean(l))
 end
 
 """
     bary(x,w,f,xx)
 
-Evaluate the polynomial interpolant to `(x,f)` at `xx` using the
+Evaluate the interpolant to `(x,f)` at `xx` using the
 barycentric interpolation formula with weights `w`.
 
 Two implementations of `bary(x,w,f,xx)` are provided.
@@ -106,13 +76,11 @@ function bary(
     @assert length(x) == length(w) == length(f)
     n = length(f)
 
-    Tden = typeof(w[1]/(xx-x[1]))
-    Tnum = typeof(zero(Tden)*f[1])
+    Tden = float(promote_type(eltype(x),eltype(w),eltype(xx)))
+    Tnum = promote_type(Tden,eltype(f))
 
     i = findfirst(x,xx)
-    if i <= n && xx == x[i]
-        return convert(Tnum,f[i])
-    end
+    i > 0 && return convert(Tnum,f[i])
 
     num = zero(Tnum)
     den = zero(Tden)
@@ -132,11 +100,11 @@ function bary(
 ) where {N}
     @assert length.(x) == length.(w) == size(f)
     for k = 1:N
-        Tden = typeof(w[k][1]/(xx[k][1]-x[k][1]))
+        Tden = float(promote_type(eltype(x[k]),eltype(w[k]),eltype(xx[k])))
         M = Matrix{Tden}(size(f,1),length(xx[k]))
         @inbounds for j = 1:size(M,2)
-            i = searchsortedfirst(x[k],xx[k][j])
-            if i <= length(x[k]) && x[k][i] == xx[k][j]
+            i = findfirst(x[k],xx[k][j])
+            if i > 0
                 M[:,j] .= 0
                 M[i,j] = 1
             else
@@ -179,9 +147,19 @@ function interpolate(
     ::BarycentricInterpolationAlgorithm
  ) where {N}
     @assert length.(x) == size(f)
-    @assert all(size(f) .> 0)
     w = baryweights.(x)
     BarycentricInterpolant(x, w, f)
+end
+
+function interpolate(
+    x::NTuple{N,<:AbstractVector},
+    f::AbstractArray{<:Any,N},
+    y::NTuple{N,<:AbstractVector},
+    ::BarycentricInterpolationAlgorithm
+ ) where {N}
+    @assert length.(x) == size(f)
+    w = baryweights.(x,y)
+    return BarycentricInterpolant(x,w,f)
 end
 
 (p::BarycentricInterpolant{1,<:Any,<:Any,<:Any})(xx::Number) = bary(p.points[1],p.weights[1],p.values,xx)

@@ -16,7 +16,7 @@ slightly different syntax for the two cases:
     - Interpolation in arbitrary dimension. `x` and `y` are tuples of
       `AbstractVector`s specifying the one-dimensional factors of the
       interpolation grid, `f` is an `AbstractArray`. `p` allows for both
-      pointwise evaluation (e.g. `p(0,0)` or `p((0,0))`) as well evaluation
+      pointwise evaluation (e.g. `p(0,0)`) as well evaluation
       on tensor-product grids (e.g. `p(([0,1],[0,1]))`).
 
 # Examples
@@ -50,6 +50,7 @@ julia> x = ([0,1],[0,1])
 ```
 """
 interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}) where {N} = interpolate(x,f,Barycentric)
+interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}, y::NTuple{N,<:AbstractVector}) where {N} = interpolate(x,f,y,Barycentric)
 interpolate(x::AbstractVector,f::AbstractVector, args...) = interpolate((x,),f, args...)
 interpolate(x::AbstractVector,f::AbstractVector,y::AbstractVector, args...) = interpolate((x,),f, (y,), args...)
 

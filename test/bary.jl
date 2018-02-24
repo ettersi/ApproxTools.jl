@@ -1,39 +1,44 @@
 @testset "barycentric interpolation" begin
 
-@testset "geometric_mean_distance" for T in Floats
-    @inferred geometric_mean_distance(zeros(T,3))
+@testset "baryweights" for T in (Floats...,complex.(Floats)...)
+    @testset "polynomial" begin
+        @inferred baryweights(zeros(T,3))
 
-    x = T[γ]; @test geometric_mean_distance(x) ≈ 1
-    x = T[γ,e]; @test geometric_mean_distance(x) ≈ abs(x[1]-x[2])
-    x = T[γ,e,π]; @test geometric_mean_distance(x) ≈ abs((x[1]-x[2])*(x[1]-x[3])*(x[2]-x[3]))^(T(1)/3)
+        n = 5
+        x = myrand(T,n)
+        w = baryweights(x)
+        c = w[1] * prod(x[1].-x[2:n])
+        for i = 2:length(x)
+            @test w[i] * prod(x[i].-x[[1:i-1;i+1:n]]) ≈ c
+        end
 
-    n = 1000
-    x = cos.(T(π)/(n-1)*collect(0:n-1))
-    @test geometric_mean_distance(x) ≈ 0.5 atol=0.01
-end
+        n = 1000
+        x = myrand(T)*cos.(T(π)/(n-1)*collect(0:n-1))
+        w = baryweights(x)
+        @test all(isfinite.(w))
+        @test !any(iszero.(w))
+        @test 2w[1] ≈ -w[2]         rtol=sqrt(n*eps(real(T)))
+        @test -w[n-1] ≈ 2w[n]       rtol=sqrt(n*eps(real(T)))
+        @test w[2:n-2] ≈ -w[3:n-1]  rtol=sqrt(n*eps(real(T)))
+    end
 
+    @testset "rational" begin
+        @inferred baryweights(zeros(T,3), zeros(T,3))
 
-@testset "baryweights" for T in Floats
-    @inferred baryweights(zeros(T,3))
-
-    n = 5
-    x = cos.(T(π)/(n-1)*collect(0:n-1))
-    w = baryweights(x)
-    @test 2w[1] ≈ - w[2]
-    @test  w[2] ≈ - w[3]
-    @test  w[3] ≈ - w[4]
-    @test  w[4] ≈ -2w[5]
-
-    n = 1000
-    x = cos.(T(π)/(n-1)*collect(0:n-1))
-    w = baryweights(x)
-    @test all(isfinite.(w))
-    @test !any(iszero.(w))
+        n = 5
+        x = myrand(T,n)
+        y = myrand(T,3)
+        w = baryweights(x,y)
+        c = w[1] * prod(x[1].-x[2:n]) / prod(x[1].-y)
+        for i = 2:length(x)
+            @test w[i] * prod(x[i].-x[[1:i-1;i+1:n]]) / prod(x[i].-y) ≈ c
+        end
+    end
 end
 
 reptuple(v,n) = ntuple(i->v,n)
 
-@testset "bary" for T in Floats
+@testset "bary" for T in (Floats...,complex.(Floats)...)
     @testset "type stability" begin
         @inferred bary(zeros(T,3),zeros(T,3),zeros(T,3),zero(T))
         @inferred bary((zeros(T,3),),(zeros(T,3),),zeros(T,3),(zero(T),))

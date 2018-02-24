@@ -1,17 +1,17 @@
 @testset "Chebyshev" begin
 
-@testset "chebpoints" for T in Floats
+@testset "chebpoints" for T in (Floats...,complex.(Floats)...)
     @test eltype(collect(chebpoints(T,3))) == T
 
     @test chebpoints(T,0) ≈ T[]
-    @test chebpoints(T,1) ≈ T[0]  atol = eps(T)
+    @test chebpoints(T,1) ≈ T[0]  atol = eps(real(T))
     @test chebpoints(T,2) ≈ T[-1,1]
     @test chebpoints(T,3) ≈ T[-1,0,1]
     @test chebpoints(T,4) ≈ T[-1,-0.5,0.5,1]
     @test chebpoints(T,5) ≈ T[-1,-1/sqrt(T(2)),0,1/sqrt(T(2)),1]
 end
 
-@testset "baryweights" for T in Floats
+@testset "baryweights" for T in (Floats...,complex.(Floats)...)
     x = chebpoints(T,5)
     p = interpolate(x,x.^2)
     @test p(π) ≈ T(π)^2
@@ -23,7 +23,7 @@ function unit(T,n,k)
     return e
 end
 
-@testset "chebcoeffs" for T in OldFloats
+@testset "chebcoeffs" for T in (OldFloats...,complex.(OldFloats)...)
     n = 10
     x = chebpoints(T,n)
     p = [ ones(x), x, @.(2x^2-1), @.(4x^3-3x), @.(8x^4-8x^2+1) ]
