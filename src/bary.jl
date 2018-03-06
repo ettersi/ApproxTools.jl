@@ -8,15 +8,22 @@ where `c = exp(mean(log(abs(w)))`. This rescaling prevents over- or
 underflow but does not change the result of the barycentric interpolation
 formula.
 """
-function baryweights(x,y = Vector{eltype(x)}(0))
+function baryweights(x, y=())
     n = length(x)
-    s = Vector{float(promote_type(eltype(x),eltype(y)))}(n)
-    l = Vector{float(promote_type(eltype(x),eltype(y)))}(n)
+    T = float(promote_type(eltype(x),eltype(y)))
+    s = ones(T,n)
+    a = zeros(T,n)
     for i = 1:n
-        s[i] = conj(prod(sign.(x[i] - x[[1:i-1;i+1:n]]))) * prod(sign.(x[i] - y))
-        l[i] = -sum(log.(abs.(x[i] - x[[1:i-1;i+1:n]]))) + sum(log.(abs.(x[i] - y)))
+        @inbounds @simd for j = [1:i-1;i+1:n]
+            s[i] *= conj(sign(x[i] - x[j]))
+            a[i] -= log(abs(x[i] - x[j]))
+        end
+        @inbounds @simd for j = 1:length(y)
+            s[i] *= sign(x[i] - y[j])
+            a[i] += log(abs(x[i] - y[j]))
+        end
     end
-    return @. s*exp(l - $mean(l))
+    return @. s*exp(a - $mean(a))
 end
 
 """
