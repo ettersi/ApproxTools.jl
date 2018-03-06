@@ -1,5 +1,3 @@
-using IterTools
-
 """
     baryweights(x [,y])
 
