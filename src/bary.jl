@@ -168,6 +168,8 @@ function interpolate(
 end
 
 (p::BarycentricInterpolant{1,<:Any,<:Any,<:Any})(xx::Number) = bary(p.points[1],p.weights[1],p.values,xx)
+(p::BarycentricInterpolant{1,<:Any,<:Any,<:Any})(xx...) = throw(MethodError(p,x))
+# ^ Make sure we don't accidentally call the below method using e.g. p([0,1])
 (p::BarycentricInterpolant{N,<:Any,<:Any,<:Any})(xx...) where {N} = p(xx)
 (p::BarycentricInterpolant{N,<:Any,<:Any,<:Any})(xx::NTuple{N,Number}) where {N} = first(bary(p.points,p.weights,p.values,xx))
 (p::BarycentricInterpolant{N,<:Any,<:Any,<:Any})(xx::NTuple{N,AbstractVector}) where {N} = bary(p.points,p.weights,p.values,xx)
