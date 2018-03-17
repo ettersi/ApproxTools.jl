@@ -1,8 +1,10 @@
 module ApproxTools
 
-include("base.jl");      export interpolate, map2refinterval
-include("bary.jl");      export geometric_mean_distance,baryweights,bary,Barycentric
-include("chebyshev.jl"); export chebpoints, chebcoeffs, chebeval
 using Compat
+
+include("base.jl");            export interpolate
+include("bary.jl");            export baryweights,bary,Barycentric
+include("chebyshev.jl");       export chebpoints, chebcoeffs, chebeval
+include("utils.jl");           export EmptyVector, map2refinterval
 
 end # module

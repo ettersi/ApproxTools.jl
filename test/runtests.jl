@@ -14,3 +14,4 @@ myrand(::Type{Complex{BigFloat}}, args...) = big.(rand(Complex128,args...)) .+ e
 include("base.jl")
 include("bary.jl")
 include("chebyshev.jl")
+include("utils.jl")
