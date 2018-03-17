@@ -1,33 +1,53 @@
+struct MockInterpolation <: ApproxTools.InterpolationAlgorithm end
+
+ApproxTools.interpolate(
+    x::NTuple{N,<:AbstractVector},
+    f::AbstractArray{<:Any,N},
+    y::NTuple{N,<:AbstractVector},
+    y2::NTuple{N,<:AbstractVector},
+    ::MockInterpolation
+) where {N} = x,f,y,y2
+
 @testset "base" begin
 
 @testset "interpolate" begin
+
     @testset "1D" begin
-        p = interpolate([0],[1]); @test p(1) == 1
-        p = interpolate([0],[1],Barycentric()); @test p(1) == 1
-        p = interpolate([0],[1],[1]); @test p(1) == 1
-        p = interpolate([0],[1],[1],Barycentric()); @test p(1) == 1
-        p = interpolate([0],[1],[1],[1]); @test p(1) == 1
-        p = interpolate([0],[1],[1],[1],Barycentric()); @test p(1) == 1
+        x = [0]
+        f = [1]
+        y = [2]
+        y2 = [3]
+        e = EmptyVector()
+
+        # Test arguments are passed correctly
+        @test interpolate(x,f,MockInterpolation()) == ((x,),f,(e,),(e,))
+        @test interpolate(x,f,y,MockInterpolation()) == ((x,),f,(y,),(e,))
+        @test interpolate(x,f,y,y2,MockInterpolation()) == ((x,),f,(y,),(y2,))
+
+        # Make sure default algorithm works
+        interpolate(x,f)
+        interpolate(x,f,y)
+        interpolate(x,f,y,y2)
     end
 
     @testset "2D definition" begin
         x = ([0],[0])
         f = reshape([1],(1,1))
-        y = ([1],[1])
-        p = interpolate(x,f); @test p(1,1) == 1
-        p = interpolate(x,f,Barycentric()); @test p(1,1) == 1
-        p = interpolate(x,f,y); @test p(1,1) == 1
-        p = interpolate(x,f,y,Barycentric()); @test p(1,1) == 1
-        p = interpolate(x,f,y,y); @test p(1,1) == 1
-        p = interpolate(x,f,y,y,Barycentric()); @test p(1,1) == 1
+        y = ([2],[2])
+        y2 = ([3],[3])
+        e = (EmptyVector(),EmptyVector())
+
+        # Test arguments are passed correctly
+        @test interpolate(x,f,MockInterpolation()) == (x,f,e,e)
+        @test interpolate(x,f,y,MockInterpolation()) == (x,f,y,e)
+        @test interpolate(x,f,y,y2,MockInterpolation()) == (x,f,y,y2)
+
+        # Make sure default algorithm works
+        interpolate(x,f)
+        interpolate(x,f,y)
+        interpolate(x,f,y,y2)
     end
 
-    @testset "2D evaluation" begin
-        p = interpolate(([0],[0]),reshape([1],(1,1)))
-        @test p(1,1) == 1
-        @test p((1,1)) == 1
-        @test p(([1],[1])) == reshape([1],(1,1))
-    end
 end
 
 
