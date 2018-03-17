@@ -34,6 +34,33 @@
             @test w[i] * prod(x[i].-x[[1:i-1;i+1:n]]) / prod(x[i].-y) ≈ c
         end
     end
+
+    @testset "rational csym" begin
+        @inferred baryweights(zeros(T,3), (), zeros(T,3))
+
+        n = 5
+        x = myrand(T,n)
+        y2 = myrand(T,3)
+        w = baryweights(x,(),y2)
+        c = w[1] * prod(x[1].-x[2:n]) / prod(x[1]^2.- y2)
+        for i = 2:length(x)
+            @test w[i] * prod(x[i].-x[[1:i-1;i+1:n]]) / prod(x[i].^2.- y2) ≈ c
+        end
+    end
+
+    @testset "rational combined" begin
+        @inferred baryweights(zeros(T,3), zeros(T,3), zeros(T,3))
+
+        n = 5
+        x = myrand(T,n)
+        y = myrand(T,3)
+        y2 = myrand(T,2)
+        w = baryweights(x,y,y2)
+        c = w[1] * prod(x[1].-x[2:n]) / (prod(x[1].-y)*prod(x[1]^2.- y2))
+        for i = 2:length(x)
+            @test w[i] * prod(x[i].-x[[1:i-1;i+1:n]]) / (prod(x[i].-y)*prod(x[i].^2.- y2)) ≈ c
+        end
+    end
 end
 
 reptuple(v,n) = ntuple(i->v,n)

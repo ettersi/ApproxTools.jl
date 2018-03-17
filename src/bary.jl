@@ -1,16 +1,17 @@
 """
-    baryweights(x [,y])
+    baryweights(x [,y [,y2]])
 
-Compute the barycentric weights for interpolation points `x` and poles `y`.
+Compute the barycentric weights for interpolation points `x` and poles `y`
+and `±√(y2)*im`.
 
 More precisely, this function computes the scaled weights `w̃ = w/c`
 where `c = exp(mean(log(abs(w)))`. This rescaling prevents over- or
 underflow but does not change the result of the barycentric interpolation
 formula.
 """
-function baryweights(x, y=())
+function baryweights(x, y=EmptyVector(), y2=EmptyVector())
     n = length(x)
-    T = float(promote_type(eltype(x),eltype(y)))
+    T = float(promote_type(eltype.((x,y,y2))...))
     s = ones(T,n)
     a = zeros(T,n)
     for i = 1:n
@@ -21,6 +22,10 @@ function baryweights(x, y=())
         @inbounds @simd for j = 1:length(y)
             s[i] *= sign(x[i] - y[j])
             a[i] += log(abs(x[i] - y[j]))
+        end
+        @inbounds @simd for j = 1:length(y2)
+            s[i] *= sign(x[i]^2 - y2[j])
+            a[i] += log(abs(x[i]^2 - y2[j]))
         end
     end
     return @. s*exp(a - $mean(a))
@@ -148,21 +153,12 @@ struct Barycentric <: InterpolationAlgorithm end
 function interpolate(
     x::NTuple{N,<:AbstractVector},
     f::AbstractArray{<:Any,N},
-    ::Barycentric
- ) where {N}
-    @assert length.(x) == size(f)
-    w = baryweights.(x)
-    BarycentricInterpolant(x, w, f)
-end
-
-function interpolate(
-    x::NTuple{N,<:AbstractVector},
-    f::AbstractArray{<:Any,N},
     y::NTuple{N,<:AbstractVector},
+    y2::NTuple{N,<:AbstractVector},
     ::Barycentric
  ) where {N}
     @assert length.(x) == size(f)
-    w = baryweights.(x,y)
+    w = baryweights.(x,y,y2)
     return BarycentricInterpolant(x,w,f)
 end
 

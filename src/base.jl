@@ -1,19 +1,19 @@
 abstract type InterpolationAlgorithm end
 
 """
-    interpolate(x,f [,y] [,alg]) -> p
+    interpolate(x,f [,y [,y2]] [,alg]) -> p
 
 Compute the interpolating polynomial to data points `(x,f)`, or
-the interpolating rational function with poles `y`.
+the interpolating rational function with poles `y` and `±√(y2)*im`.
 
 This function supports both one dimensional interpolation as well
 as interpolation on tensor-product grids in arbitrary dimensions, with
 slightly different syntax for the two cases:
 
-    - One dimensional interpolation. `x`, `f` and `y` are `AbstractVector`s,
-      `p` allows for pointwise evaluation, e.g. `p(0)`.
+    - One dimensional interpolation. `x`, `f`, `y` and `y2` are
+      `AbstractVector`s, `p` allows for pointwise evaluation, e.g. `p(0)`.
 
-    - Interpolation in arbitrary dimension. `x` and `y` are tuples of
+    - Interpolation in arbitrary dimension. `x`, `y` and `y2` are tuples of
       `AbstractVector`s specifying the one-dimensional factors of the
       interpolation grid, `f` is an `AbstractArray`. `p` allows for both
       pointwise evaluation (e.g. `p(0,0)`) as well evaluation
@@ -49,10 +49,58 @@ julia> x = ([0,1],[0,1])
  0.0  0.5   1.0
 ```
 """
-interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}) where {N} = interpolate(x,f,Barycentric())
-interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}, y::NTuple{N,<:AbstractVector}) where {N} = interpolate(x,f,y,Barycentric())
-interpolate(x::AbstractVector,f::AbstractVector, args...) = interpolate((x,),f, args...)
-interpolate(x::AbstractVector,f::AbstractVector,y::AbstractVector, args...) = interpolate((x,),f, (y,), args...)
+function interpolate end
+
+# Fill in the poles
+interpolate(
+    x::NTuple{N,<:AbstractVector},
+    f::AbstractArray{<:Any,N},
+    alg::InterpolationAlgorithm = Barycentric()
+) where {N} = interpolate(
+    x,f,
+    ntuple(i->EmptyVector(),Val{N}()),
+    ntuple(i->EmptyVector(),Val{N}()),
+    alg
+)
+
+interpolate(
+    x::NTuple{N,<:AbstractVector},
+    f::AbstractArray{<:Any,N},
+    y::NTuple{N,<:AbstractVector},
+    alg::InterpolationAlgorithm = Barycentric()
+) where {N} = interpolate(
+    x,f,y,
+    ntuple(i->EmptyVector(),Val{N}()),
+    alg
+)
+
+interpolate(
+    x::NTuple{N,<:AbstractVector},
+    f::AbstractArray{<:Any,N},
+    y::NTuple{N,<:AbstractVector},
+    y2::NTuple{N,<:AbstractVector}
+) where {N} = interpolate(x,f,y,y2,Barycentric())
+
+# Map from 1D to ND
+# The args... is only meant to capture the alg parameter
+interpolate(
+    x::AbstractVector,
+    f::AbstractVector,
+    args...
+) = interpolate((x,),f, args...)
+interpolate(
+    x::AbstractVector,
+    f::AbstractVector,
+    y::AbstractVector,
+    args...
+) = interpolate((x,),f, (y,), args...)
+interpolate(
+    x::AbstractVector,
+    f::AbstractVector,
+    y::AbstractVector,
+    y2::AbstractVector,
+    args...
+) = interpolate((x,),f, (y,), (y2,), args...)
 
 
 """
