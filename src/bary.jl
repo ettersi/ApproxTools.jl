@@ -156,7 +156,7 @@ function interpolate(
     y::NTuple{N,<:AbstractVector},
     y2::NTuple{N,<:AbstractVector},
     ::Barycentric
- ) where {N}
+) where {N}
     @assert length.(x) == size(f)
     w = baryweights.(x,y,y2)
     return BarycentricInterpolant(x,w,f)
