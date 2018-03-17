@@ -143,13 +143,12 @@ Base.ndims(::Type{BarycentricInterpolant{N,<:Any,<:Any,<:Any}}) where {N} = N
 Base.ndims(::BarycentricInterpolant{N,<:Any,<:Any,<:Any}) where {N} = N
 
 
-struct BarycentricInterpolationAlgorithm <: InterpolationAlgorithm end
-const Barycentric = BarycentricInterpolationAlgorithm()
+struct Barycentric <: InterpolationAlgorithm end
 
 function interpolate(
     x::NTuple{N,<:AbstractVector},
     f::AbstractArray{<:Any,N},
-    ::BarycentricInterpolationAlgorithm
+    ::Barycentric
  ) where {N}
     @assert length.(x) == size(f)
     w = baryweights.(x)
@@ -160,7 +159,7 @@ function interpolate(
     x::NTuple{N,<:AbstractVector},
     f::AbstractArray{<:Any,N},
     y::NTuple{N,<:AbstractVector},
-    ::BarycentricInterpolationAlgorithm
+    ::Barycentric
  ) where {N}
     @assert length.(x) == size(f)
     w = baryweights.(x,y)

@@ -4,7 +4,7 @@ abstract type InterpolationAlgorithm end
     interpolate(x,f [,y] [,alg]) -> p
 
 Compute the interpolating polynomial to data points `(x,f)`, or
-the interpolating rational function with poles `y`. 
+the interpolating rational function with poles `y`.
 
 This function supports both one dimensional interpolation as well
 as interpolation on tensor-product grids in arbitrary dimensions, with
@@ -49,8 +49,8 @@ julia> x = ([0,1],[0,1])
  0.0  0.5   1.0
 ```
 """
-interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}) where {N} = interpolate(x,f,Barycentric)
-interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}, y::NTuple{N,<:AbstractVector}) where {N} = interpolate(x,f,y,Barycentric)
+interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}) where {N} = interpolate(x,f,Barycentric())
+interpolate(x::NTuple{N,<:AbstractVector}, f::AbstractArray{<:Any,N}, y::NTuple{N,<:AbstractVector}) where {N} = interpolate(x,f,y,Barycentric())
 interpolate(x::AbstractVector,f::AbstractVector, args...) = interpolate((x,),f, args...)
 interpolate(x::AbstractVector,f::AbstractVector,y::AbstractVector, args...) = interpolate((x,),f, (y,), args...)
 
