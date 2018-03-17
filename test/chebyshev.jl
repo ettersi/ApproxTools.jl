@@ -23,7 +23,7 @@ function unit(T,n,k)
     return e
 end
 
-@testset "chebcoeffs" for T in (OldFloats...,complex.(OldFloats)...)
+@testset "chebcoeffs" for T in (BitsFloats...,complex.(BitsFloats)...)
     n = 10
     x = chebpoints(T,n)
     p = [ ones(x), x, @.(2x^2-1), @.(4x^3-3x), @.(8x^4-8x^2+1) ]

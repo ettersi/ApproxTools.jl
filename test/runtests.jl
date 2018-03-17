@@ -1,8 +1,8 @@
 using ApproxTools
 using Base.Test
 
-const OldFloats = (Float32,Float64)
-const Floats = (OldFloats..., BigFloat)
+const BitsFloats = (Float32,Float64)
+const Floats = (BitsFloats..., BigFloat)
 
 srand(42)
 
