@@ -1,6 +1,8 @@
-struct EmptyVector <: AbstractVector{Union{}} end
-Base.size(::EmptyVector) = (0,)
-Base.getindex(v::EmptyVector,i::Vararg{Int,N}) where {N} = throw(BoundsError(v,i))
+struct EmptyArray{N} <: AbstractArray{Union{},N} end
+Base.size(::EmptyArray{N}) where {N} = ntuple(i->0, Val{N}())
+Base.getindex(v::EmptyArray{N},i::Vararg{Int,N}) where {N} = throw(BoundsError(v,i))
+const EmptyVector = EmptyArray{1}
+const EmptyMatrix = EmptyArray{2}
 
 
 """
@@ -39,4 +41,3 @@ function Base.:\(at::AffineTransform,x::Number)
     m,b = at.backward
     return m*x+b
 end
-
