@@ -31,6 +31,7 @@ function baryweights(x, y=EmptyVector(), y2=EmptyVector())
     return @. s*exp(a - $mean(a))
 end
 
+
 """
     bary(x,w,f,xx)
 
