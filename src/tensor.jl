@@ -4,11 +4,11 @@ function tucker(
 ) where {N}
     T = promote_type(eltype(C),eltype.(B)...)
     C = convert(Array{T,N},C)
-    # Convert C to it's final type here, otherwise type inference gets confused
+    # Convert C to its final type here, otherwise type inference gets confused
     for k = 1:N
         tmp = reshape(C,(size(C,1),prod(Base.tail(size(C)))))
         tmp = B[k]*tmp
-        C = reshape(convert(Array,tmp'),(Base.tail(size(C))...,size(B[k],1)))
+        C = reshape(convert(Array,transpose(tmp)),(Base.tail(size(C))...,size(B[k],1)))
         # ^ Need to evaluate the transpose, otherwise type inference gets confused
     end
     return C
