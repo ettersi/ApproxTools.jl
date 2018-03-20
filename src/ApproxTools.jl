@@ -1,7 +1,9 @@
 module ApproxTools
 
-include("interpolation.jl")
 include("tensor.jl")
-export tucker,×,⊗
+export tucker, ×, ⊗
+
+include("interpolation.jl")
+export baryweights, bary, interpolate
 
 end # module
