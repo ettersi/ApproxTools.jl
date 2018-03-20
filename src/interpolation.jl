@@ -69,6 +69,7 @@ function baryvec!(
         @. b = 0
         b[I] = 1
     end
+    return nothing
 end
 
 function bary(
