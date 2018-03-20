@@ -3,10 +3,10 @@ function tucker(
     B::NTuple{N,AbstractMatrix}
 ) where {N}
     for k = 1:N
-        sf = size(C)
-        tmp = reshape(f,(size(C,1),prod(Base.tail(size(C)))))
+        tmp = reshape(C,(size(C,1),prod(Base.tail(size(C)))))
         tmp = B[k]*tmp
-        C = reshape(tmp',(Base.tail(size(C))...,size(B[k],1)))
+        C = convert(Array,reshape(tmp',(Base.tail(size(C))...,size(B[k],1))))
+        # ^ Need to explicitely evaluate here, otherwise type inference gets confused
     end
     return C
 end
@@ -16,7 +16,7 @@ end
 
 TODO
 """
-×(x::AbstractVector...) = TensorGrid{eltype.(x),length(x),typeof(x)}(x)
+×(x::AbstractVector...) = TensorGrid{Tuple{eltype.(x)...},length(x),typeof(x)}(x)
 struct TensorGrid{T,N,F} <: AbstractArray{T,N}
     factors::F
 end
@@ -36,4 +36,4 @@ struct TensorProduct{T,N,G} <: AbstractArray{T,N}
     grid::G
 end
 Base.size(x::TensorProduct) = size(x.grid)
-Base.getindex(x::TensorProduct{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = prod(x.grid[i])
+Base.getindex(x::TensorProduct{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = prod(x.grid[i...])

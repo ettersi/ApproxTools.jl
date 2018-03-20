@@ -1,2 +1,4 @@
 using ApproxTools
-using Base.Test
+using Test
+
+include("tensor.jl")
