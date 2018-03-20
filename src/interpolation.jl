@@ -38,7 +38,7 @@ function bary(
     r = zero(float(promote_type(eltype.((f,xx,x))...)))
     @inbounds @simd for i = 1:n
         I = ifelse(xx == x[i], i, I)
-        l *= s*(xx - x[i]))
+        l *= s*(xx - x[i])
         r += wf[i]/(xx-x[i])
     end
     return I == 0 ? l*r : l*wf[I]
@@ -53,7 +53,7 @@ interpolant to `(x,f)` with barycentric weights `w`.
 function baryvec!(
     b::AbstractVector,
     x::AbstractVector,
-    s::Number
+    s::Number,
     xx::Number
 )
     @assert length(b) == length(x)
@@ -61,7 +61,7 @@ function baryvec!(
     l = one(float(promote_type(eltype.((s,xx,x))...)))
     @inbounds @simd for i = 1:n
         I = ifelse(xx == x[i], i, I)
-        l *= s*(xx - x[i]))
+        l *= s*(xx - x[i])
     end
     if I == 0
         @. b = l/(xx-x)
@@ -77,7 +77,7 @@ function bary(
     f::AbstractArray{<:Any,N},
     xx::NTuple{N,Union{Number,AbstractVector}}
 ) where {N}
-    return tucker(f, ntuple(Val(N))) do k
+    return tucker(f, ntuple(Val(N)) do k
         T = float(promote_type(eltype.((s[k],x[k],xx[k]))...))
         M = Matrix{T}(size(f,k),length(xx[k]))
         for j = 1:length(xx[k])
@@ -108,12 +108,12 @@ interpolate(
     poles = ntuple(i->(),Val(N)),
     cspoles = ntuple(i->(),Val(N))
 ) where {N} = interpolate(x, baryweights.(x, poles, cspoles), f)
-function interpolate(
+interpolate(
     x::NTuple{N,AbstractVector},
     sw::NTuple{N,Tuple{Number,AbstractVector}},
     f::AbstractArray{N,<:Any}
 ) where {N} = interpolate(x,tupletranspose(sw)...,f)
-function interpolate(
+interpolate(
     x::NTuple{N,AbstractVector},
     s::NTuple{N,Number},
     w::NTuple{N,AbstractVector},
