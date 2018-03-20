@@ -1,3 +1,19 @@
+"""
+    tucker(C,B)
+
+Multiply each side of tensor `C` with the corresponding matrix `B[k]`.
+
+# Examples
+```
+julia> C = rand(2); B = (rand(3,2),);
+       tucker(C,B) == B[1]*C
+true
+
+julia> C = rand(2,3); B = (rand(4,2),rand(5,3));
+       tucker(C,B) == B[1]*C*B[2]'
+true
+```
+"""
 function tucker(
     C::AbstractArray{<:Any,N},
     B::NTuple{N,AbstractMatrix}
@@ -17,7 +33,15 @@ end
 """
     ×(x...)
 
-TODO
+Cartesian product.
+
+# Examples
+```
+julia> [1,2]×[3,4]
+2×2 ApproxTools.TensorGrid{...}:
+ (1, 3)  (1, 4)
+ (2, 3)  (2, 4)
+```
 """
 ×(x::AbstractVector...) = TensorGrid{Tuple{eltype.(x)...},length(x),typeof(x)}(x)
 struct TensorGrid{T,N,F} <: AbstractArray{T,N}
@@ -29,7 +53,15 @@ Base.getindex(x::TensorGrid{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = map(ge
 """
     ⊗(x...)
 
-TODO
+Tensor product.
+
+# Examples
+```
+julia> [1,2]⊗[3,4]
+2×2 ApproxTools.TensorProduct{...}:
+ 3  4
+ 6  8
+```
 """
 function ⊗(x::AbstractVector...)
     grid = ×(x...)
