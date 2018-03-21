@@ -14,30 +14,30 @@
         end
     end
 
-    @testset "×" begin
+    @testset "cartesian" begin
         a = [1,2]
         b = [1.,2.]
 
-        @inferred ×(a)
-        @test eltype(×(a)) == Tuple{Int}
-        @test collect(×(a)) == [(1,),(2,)]
+        @inferred cartesian(a)
+        @test eltype(cartesian(a)) == Tuple{Int}
+        @test collect(cartesian(a)) == [(1,),(2,)]
 
-        @inferred ×(a,b)
-        @test eltype(×(a,b)) == Tuple{Int,Float64}
-        @test collect(×(a,b)) == [(1,1.) (1,2.); (2,1.) (2,2.)]
+        @inferred cartesian(a,b)
+        @test eltype(cartesian(a,b)) == Tuple{Int,Float64}
+        @test collect(cartesian(a,b)) == [(1,1.) (1,2.); (2,1.) (2,2.)]
     end
 
-    @testset "⊗" begin
+    @testset "tensor" begin
         a = [1,2]
         b = [1.,2.]
 
-        @inferred ×(a)
-        @test eltype(⊗(a)) == Int
-        @test collect(⊗(a)) == [1,2]
+        @inferred tensor(a)
+        @test eltype(tensor(a)) == Int
+        @test collect(tensor(a)) == [1,2]
 
-        @inferred ⊗(a,b)
-        @test eltype(⊗(a,b)) == Float64
-        @test collect(⊗(a,b)) == [1. 2.; 2. 4.]
+        @inferred tensor(a,b)
+        @test eltype(tensor(a,b)) == Float64
+        @test collect(tensor(a,b)) == [1. 2.; 2. 4.]
     end
 
 end
