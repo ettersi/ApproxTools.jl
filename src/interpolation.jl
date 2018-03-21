@@ -34,10 +34,11 @@ end
 
 function bary(
     x::AbstractVector,
-    (s,w)::Tuple{Number,AbstractVector},
+    sw::Tuple{Number,AbstractVector},
     f::AbstractVector,
     xx::Number
 )
+    s,w = sw
     @assert length(x) == length(w) == length(f)
     n = length(x)
 
@@ -61,9 +62,10 @@ interpolant to `(x,f)` with barycentric weights `w`.
 function baryvec!(
     b::AbstractVector,
     x::AbstractVector,
-    (s,w)::Tuple{Number,AbstractVector},
+    sw::Tuple{Number,AbstractVector},
     xx::Number
 )
+    s,w = sw
     @assert length(b) == length(x)
     n = length(x)
 
