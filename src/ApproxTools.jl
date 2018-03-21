@@ -1,5 +1,7 @@
 module ApproxTools
 
+using Compat
+
 include("tensor.jl")
 export tucker, cartesian, tensor
 
