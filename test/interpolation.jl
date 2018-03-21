@@ -60,8 +60,11 @@ testy2(T) = ( (), T[3], Complex{T}[im] )
 
                 sw = baryweights(x,y,y2)
                 W = float(promote_type(eltype.((x,f,xx,y,y2))...))
-                y2h = @. sqrt(complex(-y2))
-                ya = complex(W)[y..., (.-y2h)..., y2h...]
+
+                function mergepoles(W,y,y2)
+                    y2h = @. sqrt(complex(-y2))
+                    return complex(W)[y..., (.-y2h)..., y2h...]
+                end
 
                 function refvalue(x,f,xx,y)
                     @assert length(x) == length(f) == 2
@@ -73,25 +76,25 @@ testy2(T) = ( (), T[3], Complex{T}[im] )
 
                 @testset "1D" begin
                     @test eltype(@inferred(bary(x,sw,f,xx[1],y,y2))) == W
-                    @test bary(x,sw,f,xx[1],y,y2) == refvalue(x,f,xx[1],ya)
-                    @test bary(x,sw,f,xx[2],y,y2) ≈ refvalue(x,f,xx[2],ya)
+                    @test bary(x,sw,f,xx[1],y,y2) == refvalue(x,f,xx[1],mergepoles(W,y,y2))
+                    @test bary(x,sw,f,xx[2],y,y2) ≈ refvalue(x,f,xx[2],mergepoles(W,y,y2))
                 end
 
                 @testset "2D" begin
                     # We actually should also test with different types in each  pair, but doing
                     # so makes the number of test cases explode
-                    tx = (x,x)
-                    tsw = (sw,sw)
-                    tf = f*transpose(f)
-                    txx = (xx,xx)
-                    ty = (y,y)
-                    ty2 = (y2,y2)
+                    tx = (x,x.+1)
+                    tf = (f,f.+1)
+                    txx = (xx,xx.+1)
+                    ty = (y,y.+1)
+                    ty2 = (y2,y2.+1)
+                    tsw = baryweights.(tx,ty,ty2)
 
-                    p = [refvalue(x,f,xx,ya) for xx in xx]
+                    p = map((x,f,xx,y) -> [refvalue(x,f,xx,y) for xx in xx], tx,tf,txx, mergepoles.(W,ty,ty2))
 
-                    @test eltype(@inferred(bary(tx,tsw,tf,(txx[1][1],txx[2][1]),ty,ty2))) == W
-                    @test first(bary(tx,tsw,tf,(txx[1][1],txx[2][1]),ty,ty2)) == tf[1,1]
-                    @test bary(tx,tsw,tf,txx,ty,ty2) ≈ p*transpose(p)
+                    @test eltype(@inferred(bary(tx,tsw,tf[1]*transpose(tf[2]),(txx[1][1],txx[2][1]),ty,ty2))) == W
+                    @test first(bary(tx,tsw,tf[1]*transpose(tf[2]),(txx[1][1],txx[2][1]),ty,ty2)) == tf[1][1]*tf[2][1]
+                    @test bary(tx,tsw,tf[1]*transpose(tf[2]),txx,ty,ty2) ≈ p[1]*transpose(p[2])
                 end
             end
         end
