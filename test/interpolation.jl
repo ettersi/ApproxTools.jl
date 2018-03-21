@@ -1,5 +1,8 @@
-testvalues(T::Type{<:Real}) = T[0,1]
-testvalues(T::Type{<:Complex}) = T[0,1+im]
+ testx(T) = ( T[0,1], Complex{T}[0,1+im] )
+ testf(T) = ( T[1,2], Complex{T}[1,2+im] )
+testxx(T) = ( T[0,2], Complex{T}[0,2+im] )
+ testy(T) = ( (), T[3], Complex{T}[im] )
+testy2(T) = ( (), T[3], Complex{T}[im] )
 
 @testset "interpolation" begin
 
@@ -26,13 +29,13 @@ testvalues(T::Type{<:Complex}) = T[0,1+im]
         # same precision.
         @testset for T in Reals
             @testset for
-                    x  in testvalues.(rnc(T)),
-                    y  in ((), (T->(testvalues(T).+2,)).(rnc(T))...),
-                    y2 in ((), (T->(testvalues(T).+2,)).(rnc(T))...)
+                    x  in  testx(T),
+                    y  in  testy(T),
+                    y2 in testy2(T)
+
                 n = length(x)
-                T = float(promote_type(eltype.((x,y...,y2...))...))
                 s,w = @inferred(baryweights(x,y...,y2...))
-                @test typeof(s) == eltype(w) == T
+                @test typeof(s) == eltype(w) == float(promote_type(eltype.((x,y...,y2...))...))
                 @test s^n*w ≈ refbaryweights(x,y...,y2...)
             end
         end
@@ -47,50 +50,59 @@ testvalues(T::Type{<:Complex}) = T[0,1+im]
     end
 
     @testset "bary" begin
-        @testset "1D" begin
-            @testset for T in Reals
-                @testset for
-                        x in testvalues.(rnc(T)),
-                        f in testvalues.(rnc(T)),
-                        xx in testvalues.(rnc(T))
-                    sw = baryweights(x)
-                    @test eltype(@inferred(bary(x,sw,f,xx[1]))) == float(promote_type(eltype.((x,f,xx))...))
-                    @test bary(x,sw,f,xx[1]) == xx[1]
-                    @test bary(x,sw,f,sum(xx)) ≈ (f[1]*(x[2]-sum(xx)) + f[2]*(sum(xx)-x[1]))/(x[2]-x[1])
+        @testset for T in (Int,)
+            @testset "X = $(eltype(x)), F = $(eltype(f)), XX = $(eltype(xx)), Y = $(eltype(y)), Y2 = $(eltype(y2))" for
+                    x  in  testx(T),
+                    f  in  testf(T),
+                    xx in testxx(T),
+                    y  in  testy(T),
+                    y2 in testy2(T)
+
+                sw = baryweights(x,y,y2)
+                W = float(promote_type(eltype.((x,f,xx,y,y2))...))
+                y2h = @. sqrt(complex(-y2))
+                ya = complex(W)[y..., (.-y2h)..., y2h...]
+
+                function refvalue(x,f,xx,y)
+                    @assert length(x) == length(f) == 2
+                    return (
+                            f[1]*(x[2]-xx)*prod(x[1].-y) +
+                            f[2]*(xx-x[1])*prod(x[2].-y)
+                        ) / ( prod(xx.-y)*(x[2]-x[1]) )
+                end
+
+                @testset "1D" begin
+                    @test eltype(@inferred(bary(x,sw,f,xx[1],y,y2))) == W
+                    @test bary(x,sw,f,xx[1],y,y2) == refvalue(x,f,xx[1],ya)
+                    @test bary(x,sw,f,xx[2],y,y2) ≈ refvalue(x,f,xx[2],ya)
+                end
+
+                @testset "2D" begin
+                    # We actually should also test with different types in each  pair, but doing
+                    # so makes the number of test cases explode
+                    tx = (x,x)
+                    tsw = (sw,sw)
+                    tf = f*transpose(f)
+                    txx = (xx,xx)
+                    ty = (y,y)
+                    ty2 = (y2,y2)
+
+                    p = [refvalue(x,f,xx,ya) for xx in xx]
+
+                    @test eltype(@inferred(bary(tx,tsw,tf,(txx[1][1],txx[2][1]),ty,ty2))) == W
+                    @test first(bary(tx,tsw,tf,(txx[1][1],txx[2][1]),ty,ty2)) == tf[1,1]
+                    @test bary(tx,tsw,tf,txx,ty,ty2) ≈ p*transpose(p)
                 end
             end
         end
 
-        @testset for T in Reals
-            @testset for
-                    x1 in testvalues.(rnc(T)),
-                    x2 in testvalues.(rnc(T)),
-                    f in testvalues.(rnc(T)),
-                    xx1 in testvalues.(rnc(T)),
-                    xx2 in testvalues.(rnc(T))
-                x = (x1,x2)
-                f = f.*f'
-                xx = (xx->[xx[1],2*xx[2]]).((xx1,xx2))
-                sw = baryweights.(x)
-                @test eltype(@inferred(bary(x,sw,f,(xx[1][1],xx[2][1])))) == float(promote_type(eltype.((x...,f,xx...))...))
-                @test first(bary(x,sw,f,(xx[1][1],xx[2][1]))) == f[1,1]
-                @test bary(x,sw,f,xx) ≈ [
-                    (
-                        f[1,1]*(x[1][2]-xx1)*(x[2][2]-xx2) +
-                        f[2,1]*(xx1-x[1][1])*(x[2][2]-xx2) +
-                        f[1,2]*(x[1][2]-xx1)*(xx2-x[2][1]) +
-                        f[2,2]*(xx1-x[1][1])*(xx2-x[2][1])
-                    ) / ((x[1][2]-x[1][1])*(x[2][2]-x[2][1]))
-                    for xx1 in xx[1], xx2 in xx[2]
-                ]
-            end
-        end
     end
 
     @testset "interpolate" begin
         p = @inferred(interpolate([0,1],[0,1]))
-        @test @inferred(p(0)) == 0
         @test @inferred(p(0.5)) ≈ 0.5
+        p = @inferred(interpolate([0,1],[0,1]; poles=[0.5]))
+        @test @inferred(p(0.5)) ≈ Inf
     end
 
 end
