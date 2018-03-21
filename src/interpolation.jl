@@ -155,10 +155,6 @@ interpolate(
     poles = ntuple(i->(),Val(N)),
     cspoles = ntuple(i->(),Val(N))
 ) where {N} = BarycentricInterpolant(x, baryweights.(x,poles,cspoles), f, poles, cspoles)
-# interpolate(
-#     p::BarycentricInterpolant{N},
-#     f::AbstractArray{<:Any,N}
-# ) where {N} = BarycentricInterpolant{N}(p.points, p.scalingsandweights, f, p.poles, p.cspoles)
 
 
 (p::BarycentricInterpolant{1,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::Number) = bary(p.points[1],p.scalingsandweights[1],p.values,xx,p.poles[1],p.cspoles[1])

@@ -102,10 +102,45 @@ testy2(T) = ( (), T[3], Complex{T}[im] )
     end
 
     @testset "interpolate" begin
-        p = @inferred(interpolate([0,1],[0,1]))
-        @test @inferred(p(0.5)) ≈ 0.5
-        p = @inferred(interpolate([0,1],[0,1]; poles=[0.5]))
-        @test @inferred(p(0.5)) ≈ Inf
+        @testset "1D" begin
+            x = [0,1]
+            f = [0,1]
+            y = [0.5]
+            p = @inferred(interpolate(x,f))
+            @test @inferred(p(0)) == 0
+            p = @inferred(interpolate(x,f; poles=y))
+            @test @inferred(p(0)) == 0
+            p = @inferred(interpolate(x,f; cspoles=y))
+            @test @inferred(p(0)) == 0
+            p = @inferred(interpolate(x,f; poles=y, cspoles=y))
+            @test @inferred(p(0)) == 0
+        end
+
+        @testset "2D" begin
+            x = ([0,1],[0,1])
+            f = [0 1; 1 4]
+            y = ([0.5],[0.5])
+
+            p = @inferred(interpolate(x,f))
+            @test @inferred(p(0,0)) == 0
+            @test @inferred(p((0,0))) == 0
+            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
+
+            p = @inferred(interpolate(x,f; poles=y))
+            @test @inferred(p(0,0)) == 0
+            @test @inferred(p((0,0))) == 0
+            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
+
+            p = @inferred(interpolate(x,f; cspoles = y))
+            @test @inferred(p(0,0)) == 0
+            @test @inferred(p((0,0))) == 0
+            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
+
+            p = @inferred(interpolate(x,f; poles = y, cspoles = y))
+            @test @inferred(p(0,0)) == 0
+            @test @inferred(p((0,0))) == 0
+            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
+        end
     end
 
 end
