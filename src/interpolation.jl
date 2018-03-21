@@ -1,8 +1,15 @@
 """
     baryweights(x [,y [,y2]]) -> s,w
 
-Compute the barycentric weights `s^length(x)*w` for interpolation points
-`x` and poles `y` and `±√(y2)*im`.
+Compute the barycentric weights `s^n*w` for the `n` interpolation
+points `x` and poles `y` and `±√(y2)*im`.
+
+```
+s^n *w[i] := ( prod(x[i] .- y) * prod(x[i]^2 .+ y2) ) / prod( x[i] .- x[!=i] )
+```
+
+The extra factor `s^n` allows to compute the barycentric weights
+even in cases where `s^n*w` would over- or underflow.
 """
 function baryweights(x, y = (), y2 = ())
     n = length(x)
