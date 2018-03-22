@@ -148,7 +148,7 @@ interpolate(
     f::AbstractVector;
     poles = (),
     cspoles = ()
-) = interpolate((x,),f,poles=(poles,),cspoles=(cspoles,))
+) = BarycentricInterpolant((x,), (baryweights(x,poles,cspoles),), f, (poles,), (cspoles,))
 interpolate(
     x::NTuple{N,AbstractVector},
     f::AbstractArray{<:Any,N};
@@ -156,10 +156,7 @@ interpolate(
     cspoles = ntuple(i->(),Val(N))
 ) where {N} = BarycentricInterpolant(x, baryweights.(x,poles,cspoles), f, poles, cspoles)
 
-
 (p::BarycentricInterpolant{1,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::Number) = bary(p.points[1],p.scalingsandweights[1],p.values,xx,p.poles[1],p.cspoles[1])
-(p::BarycentricInterpolant{1,<:Any,<:Any,<:Any,<:Any,<:Any})(xx...) = throw(MethodError(p,x))
-# ^ Make sure we don't accidentally call the below method using e.g. p([0,1])
-(p::BarycentricInterpolant{N,<:Any,<:Any,<:Any,<:Any,<:Any})(xx...) where {N} = p(xx)
+(p::BarycentricInterpolant{N,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::Vararg{Number,N}) where {N} = p(xx)
 (p::BarycentricInterpolant{N,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::NTuple{N,Number}) where {N} = first(bary(p.points,p.scalingsandweights,p.values,xx,p.poles,p.cspoles))
 (p::BarycentricInterpolant{N,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::NTuple{N,AbstractVector}) where {N} = bary(p.points,p.scalingsandweights,p.values,xx,p.poles,p.cspoles)
