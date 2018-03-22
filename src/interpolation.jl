@@ -126,22 +126,23 @@ function bary(
     end)
 end
 
-struct BarycentricInterpolant{N,X,SW,F,Y,Y2}
+struct BarycentricInterpolant{X,SW,F,Y,Y2}
     points::X
     scalingsandweights::SW
     values::F
     poles::Y
     cspoles::Y2
 end
-BarycentricInterpolant(
-    x::NTuple{N,AbstractVector},
-    sw::NTuple{N,Tuple{Number,AbstractVector}},
-    f::AbstractArray{<:Any,N},
-    y,y2
-) where {N} = BarycentricInterpolant{N,typeof.((x,sw,f,y,y2))...}(x,sw,f,y,y2)
+const Bary{N} = BarycentricInterpolant{
+    <: NTuple{N,AbstractVector},
+    <: NTuple{N,Tuple{Number,AbstractVector}},
+    <: AbstractArray{<:Any,N},
+    <: NTuple{N,<:Any},
+    <: NTuple{N,<:Any}
+}
 
-Base.ndims(::Type{BarycentricInterpolant{N,<:Any,<:Any,<:Any}}) where {N} = N
-Base.ndims(::BarycentricInterpolant{N,<:Any,<:Any,<:Any}) where {N} = N
+Base.ndims(::Type{<:Bary{N}}) where {N} = N
+Base.ndims(::Bary{N}) where {N} = N
 
 interpolate(
     x::AbstractVector,
@@ -156,7 +157,8 @@ interpolate(
     cspoles = ntuple(i->(),Val(N))
 ) where {N} = BarycentricInterpolant(x, baryweights.(x,poles,cspoles), f, poles, cspoles)
 
-(p::BarycentricInterpolant{1,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::Number) = bary(p.points[1],p.scalingsandweights[1],p.values,xx,p.poles[1],p.cspoles[1])
-(p::BarycentricInterpolant{N,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::Vararg{Number,N}) where {N} = p(xx)
-(p::BarycentricInterpolant{N,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::NTuple{N,Number}) where {N} = first(bary(p.points,p.scalingsandweights,p.values,xx,p.poles,p.cspoles))
-(p::BarycentricInterpolant{N,<:Any,<:Any,<:Any,<:Any,<:Any})(xx::NTuple{N,AbstractVector}) where {N} = bary(p.points,p.scalingsandweights,p.values,xx,p.poles,p.cspoles)
+(p::Bary{1})(xx::Number) = p((xx,))
+(p::Bary{1})(xx::NTuple{1,Number}) = bary(p.points[1],p.scalingsandweights[1],p.values,xx[1],p.poles[1],p.cspoles[1])
+(p::Bary{N})(xx::Vararg{Number,N}) where {N} = p(xx)
+(p::Bary{N})(xx::NTuple{N,Number}) where {N} = first(bary(p.points,p.scalingsandweights,p.values,xx,p.poles,p.cspoles))
+(p::Bary{N})(xx::NTuple{N,AbstractVector}) where {N} = bary(p.points,p.scalingsandweights,p.values,xx,p.poles,p.cspoles)
