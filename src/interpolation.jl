@@ -39,6 +39,24 @@ function baryweights(x, y = (), y2 = ())
     return exp(ml/n), @. s*exp(l-ml)
 end
 
+
+"""
+    bary(x,sw,f,xx,y=(),y2=())
+
+Evaluate the rational barycentric interpolation formula.
+
+# Arguments
+- `x`,`f`: Data to interpolate.
+- `sw`: Barycentric scalings and weights. See [`baryweights`](@ref).
+- `xx`: Evaluation point(s).
+- `y`, `y2`: Simple and conjugate symmetric poles of the interpolant.
+
+This function supports both one-dimensional interpolation as well as
+interpolation on tensor product grids. Check the source code for
+syntax details.
+"""
+function bary end
+
 function bary(
     x::AbstractVector,
     sw::Tuple{Number,AbstractVector},
@@ -143,6 +161,42 @@ const Bary{N} = BarycentricInterpolant{
 
 Base.ndims(::Type{<:Bary{N}}) where {N} = N
 Base.ndims(::Bary{N}) where {N} = N
+
+
+"""
+    interpolate(x,f; poles=(), cspoles=()) -> r
+
+Compute the rational function interpolating `(x,f)` with poles at `poles`
+and `±√(cspoles)*im`.
+
+This function supports both one-dimensional interpolation as well as
+interpolation on tensor product grids.
+
+# Examples
+One dimension:
+```
+julia> p = interpolate([0,1],[0,1])
+       p(0.5)
+0.5
+```
+
+Two dimensions:
+```
+julia> x = ([0,1],[0,1])
+       f = [0 0; 0 1]
+       p = interpolate(x,f);
+
+julia> p(0.5,0.5)
+ 0.25
+
+julia> p([0,0.5,1],[0,0.5,1])
+3×3 Array{Float64,2}:
+ 0.0  0.0   0.0
+ 0.0  0.25  0.5
+ 0.0  0.5   1.0
+```
+"""
+function interpolate end
 
 interpolate(
     x::AbstractVector,
