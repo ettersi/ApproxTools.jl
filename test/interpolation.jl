@@ -90,56 +90,87 @@ testy2(T) = ( (), T[3], Complex{T}[im] )
                     ty2 = (y2,y2.+1)
                     tsw = baryweights.(tx,ty,ty2)
 
-                    p = map((x,f,xx,y) -> [refvalue(x,f,xx,y) for xx in xx], tx,tf,txx, mergepoles.(W,ty,ty2))
+                    pref = map((x,f,xx,y) -> [refvalue(x,f,xx,y) for xx in xx], tx,tf,txx, mergepoles.(W,ty,ty2))
+                    p11 =  first(@inferred(bary(tx,tsw,tf[1]*transpose(tf[2]),(txx[1][1],txx[2][1]),ty,ty2)))
 
-                    @test eltype(@inferred(bary(tx,tsw,tf[1]*transpose(tf[2]),(txx[1][1],txx[2][1]),ty,ty2))) == W
-                    @test first(bary(tx,tsw,tf[1]*transpose(tf[2]),(txx[1][1],txx[2][1]),ty,ty2)) == tf[1][1]*tf[2][1]
-                    @test bary(tx,tsw,tf[1]*transpose(tf[2]),txx,ty,ty2) ≈ p[1]*transpose(p[2])
+                    @test typeof(p11) == W
+                    @test p11 == tf[1][1]*tf[2][1]
+                    @test @inferred(bary(tx,tsw,tf[1]*transpose(tf[2]),txx,ty,ty2)) ≈ pref[1]*transpose(pref[2])
                 end
             end
         end
-
     end
 
     @testset "interpolate" begin
         @testset "1D" begin
-            x = [0,1]
-            f = [0,1]
-            y = [0.5]
-            p = @inferred(interpolate(x,f))
-            @test @inferred(p(0)) == 0
-            p = @inferred(interpolate(x,f; poles=y))
-            @test @inferred(p(0)) == 0
-            p = @inferred(interpolate(x,f; cspoles=y))
-            @test @inferred(p(0)) == 0
-            p = @inferred(interpolate(x,f; poles=y, cspoles=y))
-            @test @inferred(p(0)) == 0
+            x = [0]
+            f = [1]
+            y = [2]
+            y2 = [3]
+
+            p = @inferred07(interpolate(x,f))
+            @test @inferred(p(x[1])) == f[1]
+            @test @inferred(p((x[1],))) == f[1]
+            @test @inferred(p(x)) == f
+            @test @inferred(p((x,))) == f
+
+            p = @inferred07(interpolate(x,f; poles=y))
+            @test @inferred(p(x[1])) == f[1]
+            @test @inferred(p((x[1],))) == f[1]
+            @test @inferred(p(x)) == f
+            @test @inferred(p((x,))) == f
+            @test abs(p(y[1])) > 1e15
+
+            p = @inferred07(interpolate(x,f; cspoles=y2))
+            @test @inferred(p(x[1])) == f[1]
+            @test @inferred(p((x[1],))) == f[1]
+            @test @inferred(p(x)) == f
+            @test @inferred(p((x,))) == f
+            @test abs(p(im*sqrt(y2[1]))) > 1e15
+
+            p = @inferred07(interpolate(x,f; poles=y, cspoles=y2))
+            @test @inferred(p(x[1])) == f[1]
+            @test @inferred(p((x[1],))) == f[1]
+            @test @inferred(p(x)) == f
+            @test @inferred(p((x,))) == f
+            @test abs(p(y[1])) > 1e15
+            @test abs(p(im*sqrt(y2[1]))) > 1e15
         end
 
         @testset "2D" begin
-            x = ([0,1],[0,1])
-            f = [0 1; 1 4]
-            y = ([0.5],[0.5])
+            x = ([0],[1])
+            f = reshape([2],(1,1))
+            y = ([3],[4])
+            y2 = ([5],[6])
 
-            p = @inferred(interpolate(x,f))
-            @test @inferred(p(0,0)) == 0
-            @test @inferred(p((0,0))) == 0
-            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
+            p = @inferred07(interpolate(x,f))
+            @test @inferred(p(x[1][1],x[2][1])) == f[1,1]
+            @test @inferred(p((x[1][1],x[2][1]))) == f[1,1]
+            @test @inferred(p(x...)) == f
+            @test @inferred(p(x)) == f
 
-            p = @inferred(interpolate(x,f; poles=y))
-            @test @inferred(p(0,0)) == 0
-            @test @inferred(p((0,0))) == 0
-            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
+            p = @inferred07(interpolate(x,f; poles=y))
+            @test @inferred(p(x[1][1],x[2][1])) == f[1,1]
+            @test @inferred(p((x[1][1],x[2][1]))) == f[1,1]
+            @test @inferred(p(x...)) == f
+            @test @inferred(p(x)) == f
+            @test abs(p((y[1][1],y[2][1]))) > 1e15
 
-            p = @inferred(interpolate(x,f; cspoles = y))
-            @test @inferred(p(0,0)) == 0
-            @test @inferred(p((0,0))) == 0
-            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
 
-            p = @inferred(interpolate(x,f; poles = y, cspoles = y))
-            @test @inferred(p(0,0)) == 0
-            @test @inferred(p((0,0))) == 0
-            @test @inferred(p(([0],[0]))) == reshape([0],(1,1))
+            p = @inferred07(interpolate(x,f; cspoles = y2))
+            @test @inferred(p(x[1][1],x[2][1])) == f[1,1]
+            @test @inferred(p((x[1][1],x[2][1]))) == f[1,1]
+            @test @inferred(p(x...)) == f
+            @test @inferred(p(x)) == f
+            @test abs(p(im.*sqrt.((y2[1][1],y2[2][1])))) > 1e15
+
+            p = @inferred07(interpolate(x,f; poles = y, cspoles = y2))
+            @test @inferred(p(x[1][1],x[2][1])) == f[1,1]
+            @test @inferred(p((x[1][1],x[2][1]))) == f[1,1]
+            @test @inferred(p(x...)) == f
+            @test @inferred(p(x)) == f
+            @test abs(p((y[1][1],y[2][1]))) > 1e15
+            @test abs(p(im.*sqrt.((y2[1][1],y2[2][1])))) > 1e15
         end
     end
 
