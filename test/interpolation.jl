@@ -6,23 +6,24 @@ testy2(T) = ( (), T[3], Complex{T}[im] )
 
 @testset "interpolation" begin
 
-    function refbaryweights(x,y=(),y2=())
-        T = float(promote_type(eltype.((x,y,y2))...))
-
-        # Make sure we compute everything at highest precision
-        x  = T[x...]
-        y  = T[y...]
-        y2 = T[y2...]
-
-        n = length(x)
-        w = Vector{T}(undef,n)
-        for i = 1:n
-            w[i] = prod(x[i] .- y) * prod(x[i]^2 .+ y2) / prod(x[i] .- x[[1:i-1;i+1:n]])
-        end
-        return w
-    end
-
     @testset "baryweights" begin
+
+        function refbaryweights(x,y=(),y2=())
+            T = float(promote_type(eltype.((x,y,y2))...))
+
+            # Make sure we compute everything at highest precision
+            x  = T[x...]
+            y  = T[y...]
+            y2 = T[y2...]
+
+            n = length(x)
+            w = Vector{T}(undef,n)
+            for i = 1:n
+                w[i] = prod(x[i] .- y) * prod(x[i]^2 .+ y2) / prod(x[i] .- x[[1:i-1;i+1:n]])
+            end
+            return w
+        end
+
         # Both baryweights and these tests would work for arbitrary
         # combinations of input types. However, compiling all these
         # test cases takes ages, so we only test input types with the
