@@ -1,5 +1,6 @@
- testx(T) = ( T[0,1], Complex{T}[0,1+im] )
- testf(T) = ( T[1,2], Complex{T}[1,2+im] )
+ testx(T) = ( T[0], T[0,1], Complex{T}[0,1+im] )
+ testf(T) = ( T[1], T[1,2], Complex{T}[1,2+im] )
+testxf(T) = ( (x,f) for x in testx(T), f in testf(T) if length(x) == length(f) )
 testxx(T) = ( T[0,2], Complex{T}[0,2+im] )
  testy(T) = ( (), T[3], Complex{T}[im] )
 testy2(T) = ( (), T[3], Complex{T}[im] )
@@ -53,8 +54,7 @@ testy2(T) = ( (), T[3], Complex{T}[im] )
     @testset "bary" begin
         @testset for T in (Int,)
             @testset "X = $(eltype(x)), F = $(eltype(f)), XX = $(eltype(xx)), Y = $(eltype(y)), Y2 = $(eltype(y2))" for
-                    x  in  testx(T),
-                    f  in  testf(T),
+                    (x,f) in testxf(T),
                     xx in testxx(T),
                     y  in  testy(T),
                     y2 in testy2(T)
@@ -68,11 +68,18 @@ testy2(T) = ( (), T[3], Complex{T}[im] )
                 end
 
                 function refvalue(x,f,xx,y)
-                    @assert length(x) == length(f) == 2
-                    return (
-                            f[1]*(x[2]-xx)*prod(x[1].-y) +
-                            f[2]*(xx-x[1])*prod(x[2].-y)
-                        ) / ( prod(xx.-y)*(x[2]-x[1]) )
+                    @assert length(x) == length(f)
+                    n = length(x)
+                    if n == 1
+                        return f[1] * prod(x[1].-y) / prod(xx.-y)
+                    elseif n == 2
+                        return (
+                                f[1]*(x[2]-xx)*prod(x[1].-y) +
+                                f[2]*(xx-x[1])*prod(x[2].-y)
+                            ) / ( prod(xx.-y)*(x[2]-x[1]) )
+                    else
+                        error()
+                    end
                 end
 
                 @testset "1D" begin
