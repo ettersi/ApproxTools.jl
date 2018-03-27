@@ -2,6 +2,7 @@
 
     @testset "chebpoints" begin
 
+        @test_throws MethodError chebpoints(Int,2)
         @test eltype(@inferred(chebpoints(2))) == Float64
 
         for T in Floats

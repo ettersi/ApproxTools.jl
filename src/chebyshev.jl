@@ -4,7 +4,7 @@
 The `n` Chebyshev points on [-1,1] in type `T`.
 """
 chebpoints(n::Int) = chebpoints(Float64,n)
-chebpoints(T::Type, n::Int) = Chebpoints{T}(n)
+chebpoints(T::Type{<:AbstractFloat}, n::Int) = Chebpoints{T}(n)
 struct Chebpoints{T} <: AbstractVector{T}
     n::Int
     m::T
