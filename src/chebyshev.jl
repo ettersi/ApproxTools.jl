@@ -22,33 +22,12 @@ end
 Base.size(x::Chebpoints) = size(x.data)
 Base.getindex(x::Chebpoints, i::Int) = x.data[i]
 
-
-function baryweights(x::Chebpoints)
-    T = eltype(x)
+function pointsprod(si,li,xi,x::Chebpoints,i)
     n = length(x)
-    return T(2),ChebBaryWeights{T}(n)
-end
-struct ChebBaryWeights{T} <: AbstractVector{T}
-    n::Int
-    f::T
-    function ChebBaryWeights{T}(n) where {T}
-        @assert n > 0
-        if n > 1
-            f = T(1)/(4*(n-1))
-        else
-            f = T(1)
-        end
-        new(n,f)
+    T = typeof(xi)
+    if n != 1
+        si *= ifelse(iseven(n-i),1,-1)
+        li += (n-2)*log(T(2)) - log(T(ifelse(i == 1 || i == n, 2, 1)*(n-1)))
     end
-end
-Base.size(w::ChebBaryWeights) = (w.n,)
-function Base.getindex(w::ChebBaryWeights, i::Int)
-    n = w.n
-    f = w.f
-    T = eltype(w)
-    r = f*ifelse(iseven(n-i),1,-1)
-    if i == 1 || i == n
-        r /= 2
-    end
-    return r
+    return si,li
 end

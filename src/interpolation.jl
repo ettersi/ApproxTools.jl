@@ -17,26 +17,43 @@ function baryweights(x, y = (), y2 = ())
 
     s = ones(T,n)
     l = zeros(T,n)
-    for i = 1:n
+    @inbounds for i = 1:n
         xi = convert(promote_type(eltype(x),real(T)),x[i])
         # ^ Make sure we compute everything at highest precision
-        @inbounds @simd for j = [1:i-1;i+1:n]
-            s[i] *= conj(sign(xi - x[j]))
-            l[i] -= log(abs(xi - x[j]))
-        end
-        @inbounds @simd for j = 1:length(y)
-            s[i] *= sign(xi - y[j])
-            l[i] += log(abs(xi - y[j]))
-        end
-        @inbounds @simd for j = 1:length(y2)
-            s[i] *= sign(xi^2 + y2[j])
-            l[i] += log(abs(xi^2 + y2[j]))
-        end
+
+        # We factor the products into separate functions to allow
+        # for dispatch to more efficient functions for particular
+        # point sets (e.g. Chebyshev points).
+        s[i],l[i] = pointsprod(s[i],l[i],xi,x,i)
+        s[i],l[i] = poleprod(s[i],l[i],xi,y)
+        s[i],l[i] = cspoleprod(s[i],l[i],xi,y2)
     end
 
     # Scale weights to prevent over-/underflow
     ml = mean(l)
     return exp(ml/n), @. s*exp(l-ml)
+end
+
+function pointsprod(si,li,xi,x,i)
+    @inbounds @simd for j = [1:i-1;i+1:length(x)]
+        si *= conj(sign(xi - x[j]))
+        li -= log(abs(xi - x[j]))
+    end
+    return si,li
+end
+function poleprod(si,li,xi,y)
+    @inbounds @simd for j = 1:length(y)
+        si *= sign(xi - y[j])
+        li += log(abs(xi - y[j]))
+    end
+    return si,li
+end
+function cspoleprod(si,li,xi,y2)
+    @inbounds @simd for j = 1:length(y2)
+        si *= sign(xi^2 + y2[j])
+        li += log(abs(xi^2 + y2[j]))
+    end
+    return si,li
 end
 
 
