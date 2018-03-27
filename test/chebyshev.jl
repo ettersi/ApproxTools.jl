@@ -18,11 +18,13 @@
         end
     end
 
-    @testset "baryweights" for T in Floats, n = 1:5
-        x = chebpoints(T,n)
-        s,w = baryweights(x)
-        sref,wref = baryweights(collect(x))
-        @test s^n*w ≈ sref^n*wref
+    @testset "baryweights" begin
+        @testset for T in Floats, n = 1:5
+            x = chebpoints(T,n)
+            s,w = baryweights(x)
+            sref,wref = baryweights(collect(x))
+            @test s^n*w ≈ sref^n*wref
+        end
     end
 
 end
