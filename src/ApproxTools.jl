@@ -11,7 +11,7 @@ end
 include("tensor.jl")
 export tucker, cartesian, tensor
 
-include("interpolation.jl")
+include("interpolate.jl")
 export baryweights, bary, interpolate
 
 include("chebyshev.jl")
