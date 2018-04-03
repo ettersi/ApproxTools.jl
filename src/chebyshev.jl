@@ -31,3 +31,15 @@ function pointsprod(si,li,xi,x::Chebpoints,i)
     end
     return si,li
 end
+
+
+struct ChebyshevInterpolation <: ApproximationAlgorithm end
+function approximate(
+    T::Type,
+    f,
+    n::NTuple{<:Any,Number},
+    ::ChebyshevInterpolation
+)
+    x = chebpoints.(T,n)
+    return interpolate(x, (x->f(x...)).(cartesian(x)))
+end
