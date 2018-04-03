@@ -14,6 +14,9 @@ export tucker, cartesian, tensor
 include("interpolate.jl")
 export baryweights, bary, interpolate
 
+include("approximate.jl")
+export approximate
+
 include("chebyshev.jl")
 export chebpoints
 
