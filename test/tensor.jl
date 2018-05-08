@@ -33,4 +33,23 @@
         @test collect(cartesian((a,b))) == [(1,1.) (1,2.); (2,1.) (2,2.)]
     end
 
+    @testset "grideval" begin
+        a = [1,2]
+        b = [1.,2.]
+
+        @inferred grideval(*,  a )
+        @inferred grideval(*, (a,))
+        @test eltype(grideval(*,  a  )) == Int
+        @test eltype(grideval(*, (a,))) == Int
+        @test collect(grideval(*,  a  )) == [1,2]
+        @test collect(grideval(*, (a,))) == [1,2]
+
+        @inferred grideval(*,  a,b )
+        @inferred grideval(*, (a,b))
+        @test eltype(grideval(*,  a,b )) == Float64
+        @test eltype(grideval(*, (a,b))) == Float64
+        @test collect(grideval(*,  a,b )) == [1. 2.; 2. 4.]
+        @test collect(grideval(*, (a,b))) == [1. 2.; 2. 4.]
+    end
+
 end

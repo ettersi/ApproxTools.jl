@@ -51,3 +51,20 @@ struct TensorGrid{T,N,F} <: AbstractArray{T,N}
 end
 Base.size(x::TensorGrid) = length.(x.factors)
 Base.getindex(x::TensorGrid{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = map(getindex,x.factors,i)
+
+"""
+    grideval(f, x::AbstractVector...)
+    grideval(f, x::NTuple{N,AbstractVector})
+
+Evaluate `f` on the grid spanned by the `x`.
+
+# Examples
+```
+julia> grideval(*, ([1,2],[3,4]))
+2×2 Array{Int64,2}:
+ 3  4
+ 6  8
+```
+"""
+grideval(f, x::AbstractVector...) = grideval(f,x)
+grideval(f, x::NTuple{N,AbstractVector}) where {N} = (x->f(x...)).(cartesian(x))
