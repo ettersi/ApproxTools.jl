@@ -51,28 +51,3 @@ struct TensorGrid{T,N,F} <: AbstractArray{T,N}
 end
 Base.size(x::TensorGrid) = length.(x.factors)
 Base.getindex(x::TensorGrid{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = map(getindex,x.factors,i)
-
-"""
-    tensor(x::AbstractVector...)
-    tensor(x::NTuple{N,AbstractVector})
-
-Tensor product.
-
-# Examples
-```
-julia> tensor([1,2],[3,4])
-2×2 ApproxTools.TensorProduct{...}:
- 3  4
- 6  8
-```
-"""
-tensor(x::AbstractVector...) = tensor(x)
-function tensor(x::NTuple{N,AbstractVector}) where {N}
-    grid = cartesian(x...)
-    return TensorProduct{promote_type(eltype.(x)...),length(x), typeof(grid)}(grid)
-end
-struct TensorProduct{T,N,G} <: AbstractArray{T,N}
-    grid::G
-end
-Base.size(x::TensorProduct) = size(x.grid)
-Base.getindex(x::TensorProduct{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = prod(x.grid[i...])

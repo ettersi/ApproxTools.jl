@@ -33,23 +33,4 @@
         @test collect(cartesian((a,b))) == [(1,1.) (1,2.); (2,1.) (2,2.)]
     end
 
-    @testset "tensor" begin
-        a = [1,2]
-        b = [1.,2.]
-
-        @inferred tensor( a )
-        @inferred tensor((a,))
-        @test eltype(tensor( a  )) == Int
-        @test eltype(tensor((a,))) == Int
-        @test collect(tensor( a  )) == [1,2]
-        @test collect(tensor((a,))) == [1,2]
-
-        @inferred tensor( a,b )
-        @inferred tensor((a,b))
-        @test eltype(tensor( a,b )) == Float64
-        @test eltype(tensor((a,b))) == Float64
-        @test collect(tensor( a,b )) == [1. 2.; 2. 4.]
-        @test collect(tensor((a,b))) == [1. 2.; 2. 4.]
-    end
-
 end
