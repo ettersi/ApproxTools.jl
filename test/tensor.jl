@@ -18,26 +18,38 @@
         a = [1,2]
         b = [1.,2.]
 
-        @inferred cartesian(a)
-        @test eltype(cartesian(a)) == Tuple{Int}
-        @test collect(cartesian(a)) == [(1,),(2,)]
+        @inferred cartesian( a  )
+        @inferred cartesian((a,))
+        @test eltype(cartesian( a  )) == Tuple{Int}
+        @test eltype(cartesian((a,))) == Tuple{Int}
+        @test collect(cartesian( a  )) == [(1,),(2,)]
+        @test collect(cartesian((a,))) == [(1,),(2,)]
 
-        @inferred cartesian(a,b)
-        @test eltype(cartesian(a,b)) == Tuple{Int,Float64}
-        @test collect(cartesian(a,b)) == [(1,1.) (1,2.); (2,1.) (2,2.)]
+        @inferred cartesian( a,b )
+        @inferred cartesian((a,b))
+        @test eltype(cartesian( a,b )) == Tuple{Int,Float64}
+        @test eltype(cartesian((a,b))) == Tuple{Int,Float64}
+        @test collect(cartesian( a,b )) == [(1,1.) (1,2.); (2,1.) (2,2.)]
+        @test collect(cartesian((a,b))) == [(1,1.) (1,2.); (2,1.) (2,2.)]
     end
 
     @testset "tensor" begin
         a = [1,2]
         b = [1.,2.]
 
-        @inferred tensor(a)
-        @test eltype(tensor(a)) == Int
-        @test collect(tensor(a)) == [1,2]
+        @inferred tensor( a )
+        @inferred tensor((a,))
+        @test eltype(tensor( a  )) == Int
+        @test eltype(tensor((a,))) == Int
+        @test collect(tensor( a  )) == [1,2]
+        @test collect(tensor((a,))) == [1,2]
 
-        @inferred tensor(a,b)
-        @test eltype(tensor(a,b)) == Float64
-        @test collect(tensor(a,b)) == [1. 2.; 2. 4.]
+        @inferred tensor( a,b )
+        @inferred tensor((a,b))
+        @test eltype(tensor( a,b )) == Float64
+        @test eltype(tensor((a,b))) == Float64
+        @test collect(tensor( a,b )) == [1. 2.; 2. 4.]
+        @test collect(tensor((a,b))) == [1. 2.; 2. 4.]
     end
 
 end

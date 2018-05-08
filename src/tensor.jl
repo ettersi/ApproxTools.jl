@@ -31,7 +31,8 @@ function tucker(
 end
 
 """
-    cartesian(x...)
+    cartesian(x::AbstractVector...)
+    cartesian(x::NTuple{N,AbstractVector})
 
 Cartesian product.
 
@@ -43,7 +44,8 @@ julia> cartesian([1,2],[3,4])
  (2, 3)  (2, 4)
 ```
 """
-cartesian(x::AbstractVector...) = TensorGrid{Tuple{eltype.(x)...},length(x),typeof(x)}(x)
+cartesian(x::AbstractVector...) = cartesian(x)
+cartesian(x::NTuple{N,AbstractVector}) where {N} = TensorGrid{Tuple{eltype.(x)...},length(x),typeof(x)}(x)
 struct TensorGrid{T,N,F} <: AbstractArray{T,N}
     factors::F
 end
@@ -51,7 +53,8 @@ Base.size(x::TensorGrid) = length.(x.factors)
 Base.getindex(x::TensorGrid{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = map(getindex,x.factors,i)
 
 """
-    tensor(x...)
+    tensor(x::AbstractVector...)
+    tensor(x::NTuple{N,AbstractVector})
 
 Tensor product.
 
@@ -63,7 +66,8 @@ julia> tensor([1,2],[3,4])
  6  8
 ```
 """
-function tensor(x::AbstractVector...)
+tensor(x::AbstractVector...) = tensor(x)
+function tensor(x::NTuple{N,AbstractVector}) where {N}
     grid = cartesian(x...)
     return TensorProduct{promote_type(eltype.(x)...),length(x), typeof(grid)}(grid)
 end
