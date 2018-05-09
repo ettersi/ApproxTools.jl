@@ -1,7 +1,6 @@
 @testset "chebyshev" begin
 
     @testset "chebpoints" begin
-
         @test_throws MethodError chebpoints(Int,2)
         @test eltype(@inferred(chebpoints(2))) == Float64
 
@@ -18,12 +17,13 @@
         end
     end
 
-    @testset "baryweights" begin
+    @testset "prodpot" begin
+        using ApproxTools: prodpot
         @testset for T in Floats, n = 1:5
             x = chebpoints(T,n)
-            s,w = baryweights(x)
-            sref,wref = baryweights(collect(x))
-            @test s^n*w ≈ sref^n*wref
+            w = @inferred(prodpot(x))
+            ŵ = prodpot(collect(x))
+            @test convert.(float(real(T)),w) ≈ convert.(float(real(T)),ŵ)
         end
     end
 

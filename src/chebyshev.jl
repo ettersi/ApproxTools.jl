@@ -11,7 +11,7 @@ struct Chebpoints{T} <: AbstractVector{T}
         if n == 1
             return new(T[0])
         else
-            data = Vector{T}(n)
+            data = Vector{T}(undef,n)
             for i = 1:n
                 data[i] = cos(T(π)*(n-i)/(n-1))
             end
@@ -22,24 +22,18 @@ end
 Base.size(x::Chebpoints) = size(x.data)
 Base.getindex(x::Chebpoints, i::Int) = x.data[i]
 
-function pointsprod(si,li,xi,x::Chebpoints,i)
+function prodpot(x::Chebpoints)
     n = length(x)
-    T = typeof(xi)
-    if n != 1
-        si *= ifelse(iseven(n-i),1,-1)
-        li += (n-2)*log(T(2)) - log(T(ifelse(i == 1 || i == n, 2, 1)*(n-1)))
+    T = real(eltype(x))
+
+    n == 1 && return [LogNumber(1,T(0))]
+
+    w = Vector{LogNumber{Int,T}}(undef,n)
+    w[1] = LogNumber(ifelse(isodd(n),1,-1), log(T(n-1)) - (n-3)*log(T(2)))
+    for i = 2:n-1
+        w[i] = LogNumber(ifelse(isodd(n-i+1),1,-1), log(T(n-1)) - (n-2)*log(T(2)))
     end
-    return si,li
-end
+    w[n] = LogNumber(1, log(T(n-1)) - (n-3)*log(T(2)))
 
-
-struct ChebyshevInterpolation <: ApproximationAlgorithm end
-function approximate(
-    T::Type,
-    f,
-    n::NTuple{<:Any,Number},
-    ::ChebyshevInterpolation
-)
-    x = chebpoints.(T,n)
-    return interpolate(x, (x->f(x...)).(cartesian(x)))
+    return w
 end
