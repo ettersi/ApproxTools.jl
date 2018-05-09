@@ -5,11 +5,12 @@ Base.eltype(b::Basis,x̂::Union{Number,AbstractVector}) = eltype(typeof(b),typeo
 
 function interpolationpoints end
 
-struct LinearCombination{C,B}
+struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,Basis}}
     coefficients::C
     basis::B
 end
-const LinComb{N} = LinearCombination{<:AbstractArray{<:Any,N}, <:NTuple{N,Basis}}
+LinearCombination(c::AbstractArray{<:Number,N},b::NTuple{N,Basis}) where {N} = LinearCombination{N,typeof(c),typeof(b)}(c,b)
+LinearCombination(c::AbstractArray{<:Number,N},b::Basis) where {N} = LinearCombination(c,(b,))
 
 interpolate(f,b::Basis) = interpolate(f,(b,))
 interpolate(f,b::NTuple{N,Basis}) where {N} = LinearCombination(grideval(f, interpolationpoints.(b)), b)
@@ -40,8 +41,8 @@ function evaluate(
     end)
 end
 
-(lc::LinComb{N})(x::Vararg{Union{Number,AbstractVector},N}) where {N} = lc(x)
-(lc::LinComb{N})(x::NTuple{N,Number}) where {N} = evaluate(lc.coefficients, lc.basis, x)[1]
-(lc::LinComb{N})(x::NTuple{N,Union{Number,AbstractVector}}) where {N} = evaluate(lc.coefficients, lc.basis, x)
-(lc::LinComb{1})(x::NTuple{1,Number}) = evaluate(lc.coefficients, lc.basis[1], x[1])
-(lc::LinComb{1})(x::NTuple{1,AbstractVector}) = throw(MethodError(lc,x))
+(lc::LinearCombination{N})(x::Vararg{Union{Number,AbstractVector},N}) where {N} = lc(x)
+(lc::LinearCombination{N})(x::NTuple{N,Number}) where {N} = evaluate(lc.coefficients, lc.basis, x)[1]
+(lc::LinearCombination{N})(x::NTuple{N,Union{Number,AbstractVector}}) where {N} = evaluate(lc.coefficients, lc.basis, x)
+(lc::LinearCombination{1})(x::NTuple{1,Number}) = evaluate(lc.coefficients, lc.basis[1], x[1])
+(lc::LinearCombination{1})(x::NTuple{1,AbstractVector}) = throw(MethodError(lc,x))
