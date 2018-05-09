@@ -69,11 +69,16 @@ end
 """
     extract_scale(x) -> s,x̃
 
-Returns a scalar `s` and a vector `x̃` such that `x == s^length(x) * x̃`
-and `mean(log(x̃)) ≈ 1`.
+Rescale `x` such that `mean(log(x̃)) ≈ 0`.
 
-If `x` is a `Vector{<:LogNumber}`, the result will be converted back to a
-traditional floating-point type.
+`s` and `x̃` are defined through the following relations:
+ - `x ≈ s^n * x̃`,
+ - `mean(log(x̃)) ≈ 0`.
+
+A product of `n` numbers generally scales exponentially in `n` and
+hence the result is likely to over- or underflow in most floating-point
+types. Rescaling in the above way returns `s` and `x̃` to `O(1)` such
+that they can be safely represented in standard floating-point types.
 """
 function extract_scale(x::AbstractVector)
     n = length(x)
@@ -89,6 +94,19 @@ struct Barycentric{X,P,S,W} <: Basis
     weights::W
 end
 
+"""
+    Barycentric(x, pot = one)
+
+Basis functions for barycentric interpolation.
+
+The basis functions are given by
+
+   b[k](x̂) = prod(x̂ - x̃) / prod(x[k] - x̃) * pot(x̂) / pot(x[k])
+
+where
+
+    x̃ = x[setdiff(1:n,k)]
+"""
 Barycentric(x::AbstractVector, pot = one) =
     Barycentric(x,pot, extract_scale(1 ./ (pot.(x) .* prodpot(x)))...)
 

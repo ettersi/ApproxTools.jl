@@ -1,9 +1,29 @@
+"""
+    Basis
+
+Abstract supertype for sets of basis vectors.
+"""
 abstract type Basis end
 
 Base.eltype(::Type{B},::Type{X̂}) where {B<:Basis,X̂<:AbstractVector} = eltype(B,eltype(X̂))
 Base.eltype(b::Basis,x̂::Union{Number,AbstractVector}) = eltype(typeof(b),typeof(x̂))
 
 function interpolationpoints end
+
+
+"""
+    LinearCombination(c::AbstractVector, b::Basis) -> p
+    LinearCombination(c::AbstractArray{N}, b::NTuple{N,Basis}) -> p
+
+Linear combination of basis vectors.
+
+    p(x) = sum(c.*b(x))
+
+The returned function object allows for pointwise evaluation (e.g.
+`p(x)` or `p(x,y)`) or evaluation on tensor-product grids for
+dimensions `N > 1` (e.g. `p([x1,x2],[y1,y2]) -> Matrix).
+"""
+function LinearCombination end
 
 struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,Basis}}
     coefficients::C
@@ -12,6 +32,10 @@ end
 LinearCombination(c::AbstractArray{<:Number,N},b::NTuple{N,Basis}) where {N} = LinearCombination{N,typeof(c),typeof(b)}(c,b)
 LinearCombination(c::AbstractArray{<:Number,N},b::Basis) where {N} = LinearCombination(c,(b,))
 
+"""
+    interpolate(f, b::Basis) -> LinearCombination{1}
+    interpolate(f, b::NTuple{N,Basis}) -> LinearCombination{N}
+"""
 interpolate(f,b::Basis) = interpolate(f,(b,))
 interpolate(f,b::NTuple{N,Basis}) where {N} = LinearCombination(grideval(f, interpolationpoints.(b)), b)
 
