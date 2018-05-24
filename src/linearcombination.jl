@@ -11,6 +11,11 @@ Base.eltype(b::Basis,x̂::Union{Number,AbstractVector}) = eltype(typeof(b),typeo
 function interpolationpoints end
 
 
+struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,Basis}}
+    coefficients::C
+    basis::B
+end
+
 """
     LinearCombination(c::AbstractVector, b::Basis) -> p
     LinearCombination(c::AbstractArray{N}, b::NTuple{N,Basis}) -> p
@@ -24,11 +29,6 @@ The returned function object allows for pointwise evaluation (e.g.
 dimensions `N > 1` (e.g. `p([x1,x2],[y1,y2]) -> Matrix).
 """
 function LinearCombination end
-
-struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,Basis}}
-    coefficients::C
-    basis::B
-end
 LinearCombination(c::AbstractArray{<:Number,N},b::NTuple{N,Basis}) where {N} = LinearCombination{N,typeof(c),typeof(b)}(c,b)
 LinearCombination(c::AbstractArray{<:Number,N},b::Basis) where {N} = LinearCombination(c,(b,))
 
