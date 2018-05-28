@@ -108,7 +108,7 @@
     end
 
     @testset "Barycentric interpolation" begin
-        @testset "1D" begin
+        @testset "1D polynomial" begin
             f = x->x^2
             b = @inferred(Barycentric([-1,0,1]))
             p = @inferred(interpolate(f,b))
@@ -116,10 +116,27 @@
             @test p.(x̂) ≈ f.(x̂)
         end
 
-        @testset "2D" begin
+        @testset "2D polynomial" begin
             f = *
             b = @inferred(Barycentric([-1,0,1]))
             p = @inferred(interpolate(f,(b,b)))
+            x̂ = linspace(-3,3,10)
+            @test p(x̂,x̂) ≈ f.(x̂,x̂')
+        end
+
+        @testset "1D rational" begin
+            f = x->x^2/(x-4)
+            b = @inferred(Barycentric([-1,0,1], x->1/prodpot(x,[4])))
+            p = @inferred(interpolate(f,b))
+            x̂ = linspace(-3,3,10)
+            @test p.(x̂) ≈ f.(x̂)
+        end
+
+        @testset "2D rational" begin
+            f = (x1,x2) -> x1*x2 / (x1 - 4) / (x2 - 5)
+            b1 = @inferred(Barycentric([-1,0,1], x->1/prodpot(x,[4])))
+            b2 = @inferred(Barycentric([-1,0,1], x->1/prodpot(x,[5])))
+            p = @inferred(interpolate(f,(b1,b2)))
             x̂ = linspace(-3,3,10)
             @test p(x̂,x̂) ≈ f.(x̂,x̂')
         end
