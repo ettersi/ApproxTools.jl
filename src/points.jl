@@ -37,3 +37,4 @@ function prodpot(x::Chebpoints)
 
     return w
 end
+

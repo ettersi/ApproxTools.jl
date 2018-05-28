@@ -1,4 +1,4 @@
-@testset "chebyshev" begin
+@testset "points" begin
 
     @testset "chebpoints" begin
         @test_throws MethodError chebpoints(Int,2)

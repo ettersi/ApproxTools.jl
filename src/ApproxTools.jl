@@ -11,7 +11,7 @@ export interpolate
 include("barycentric.jl")
 export Barycentric
 
-include("chebyshev.jl")
+include("points.jl")
 export chebpoints
 
 end # module
