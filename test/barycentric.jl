@@ -60,14 +60,6 @@
         end
     end
 
-    @testset "extract scale" begin
-        using ApproxTools: extract_scale
-        x = [1,2,3]
-        s,x̃ = @inferred(extract_scale(x))
-        @test s^3 .* x̃ ≈ x
-        @test abs(mean(log.(x̃))) < eps()
-    end
-
     @testset "Barycentric" begin
         using ApproxTools: interpolationpoints
 

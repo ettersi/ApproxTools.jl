@@ -75,27 +75,6 @@ function prodpot(x::AbstractVector)
 end
 
 
-"""
-    extract_scale(x) -> s,x̃
-
-Rescale `x` such that `mean(log(x̃)) ≈ 0`.
-
-`s` and `x̃` are defined through the following relations:
- - `x ≈ s^n * x̃`,
- - `mean(log(x̃)) ≈ 0`.
-
-A product of `n` numbers generally scales exponentially in `n` and
-hence the result is likely to over- or underflow in most floating-point
-types. Rescaling in the above way returns `s` and `x̃` to `O(1)` such
-that they can be safely represented in standard floating-point types.
-"""
-function extract_scale(x::AbstractVector)
-    n = length(x)
-    logS = mapreduce(logabs, +, x)/n
-    return exp(logS/n), (xi->sign(xi)*exp(logabs(xi) - logS)).(x)
-end
-
-
 struct Barycentric{X,P,W} <: Basis
     points::X
     potential::P
