@@ -55,8 +55,8 @@
         end
 
         @testset "overflow" begin
-            x = lognumber(realmax())
-            @test logabs(x*x) ≈ 2*log(realmax())
+            x = lognumber(sqrt(realmax()))
+            @test logabs(x*x*x) ≈ 1.5*log(realmax())
         end
     end
 

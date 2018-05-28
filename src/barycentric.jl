@@ -24,7 +24,7 @@ end
 LogNumber(s::Number, l::Real) = LogNumber{float(typeof(s)),float(typeof(l))}(s,l)
 
 Base.sign(x::LogNumber) = x.sign
-logabs(x::Number) = log(abs(x))
+logabs(x::Number) = log(abs2(x))/2
 logabs(x::LogNumber) = x.logabs
 
 lognumber(::Type{T}) where {T<:Number} = LogNumber{float(T), float(real(T))}
