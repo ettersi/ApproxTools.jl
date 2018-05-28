@@ -37,10 +37,26 @@
     end
 
     @testset "prodpot" begin
-        using ApproxTools: prodpot
-        @testset for T = [Int, Float64]
-            x = T[1,2,3]
-            @test @inferred(prodpot(x)) == [prod(x[1].-x[[2,3]]), prod(x[2].-x[[1,3]]), prod(x[3].-x[[1,2]])]
+        using ApproxTools: prodpot, lognumber, logabs
+
+        testx̂(::Type{T}) where {T <: Real} = T(1)
+        testx̂(::Type{T}) where {T <: Complex} = testx̂(real(T))+im
+        testx(::Type{T}) where {T <: Real} = T[2,3,4]
+        testx(::Type{T}) where {T <: Complex} = testx(real(T)).+im
+
+        @testset for T1 = rnc(Reals), T2 = rnc(Reals)
+            x̂ = testx̂(T1)
+            x = testx(T2)
+            @test float(@inferred(prodpot(x̂,x))) ≈ prod(x̂.-x)
+        end
+        @testset for T = rnc(Reals)
+            x = testx(T)
+            @test float.(@inferred(prodpot(x))) ≈ [prod(x[1].-x[[2,3]]), prod(x[2].-x[[1,3]]), prod(x[3].-x[[1,2]])]
+        end
+
+        @testset "overflow" begin
+            x = lognumber(realmax())
+            @test logabs(x*x) ≈ 2*log(realmax())
         end
     end
 

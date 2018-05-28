@@ -52,7 +52,18 @@ Base.:/(x::LogNumber,y::LogNumber) = LogNumber(x.sign * conj(y.sign), x.logabs -
 
 
 """
-    prodpot(x)
+    prodpot(x̂::Number,x::AbstractVector)
+
+Efficient and stable implementation of `prod(x̂-x)`.
+
+The result is returned as a `LogNumber` to avoid over- or underflow.
+"""
+function prodpot(x̂::Number,x::AbstractVector)
+    T = lognumber(float(promote_type(typeof(x̂),eltype(x))))
+    return mapreduce(xj->x̂-xj, *, one(T), x)
+end
+"""
+    prodpot(x::AbstractVector)
 
 Efficient and stable implementation of
 
@@ -63,12 +74,9 @@ underflow.
 """
 function prodpot(x::AbstractVector)
     n = length(x)
-    return (i -> mapreduce(
-            xj->x[i]-xj, *,
-            one(lognumber(float(eltype(x)))),
-            @view(x[[1:i-1;i+1:n]])
-    )).(1:n)
+    return (i -> prodpot(x[i], @view x[[1:i-1; i+1:n]])).(1:n)
 end
+
 
 """
     extract_scale(x) -> s,x̃
