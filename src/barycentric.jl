@@ -17,31 +17,35 @@ It remains to be seen whether this has any practical relevance.
 A better workaround would be to create a floating-point with
 arbitrary exponent and mantissa.
 """
-struct LogNumber{S<:Number,L<:Real} <: Number
+struct LogNumber{S<:Union{AbstractFloat,Complex{<:AbstractFloat}},L<:AbstractFloat} <: Number
     sign::S
     logabs::L
 end
+LogNumber(s::Number, l::Real) = LogNumber{float(typeof(s)),float(typeof(l))}(s,l)
 
 Base.sign(x::LogNumber) = x.sign
 logabs(x::Number) = log(abs(x))
 logabs(x::LogNumber) = x.logabs
 
-lognumber(::Type{T}) where {T <: Number} = LogNumber{T, real(T)}
+lognumber(::Type{T}) where {T<:Number} = LogNumber{float(T), float(real(T))}
 lognumber(x::Number) = convert(LogNumber, x)
+Base.float(x::LogNumber{S,L}) where {S,L} = convert(promote_type(S,L),x)
 
-Base.one(::Type{LogNumber{S,L}}) where {S<:Number, L<:Real} = LogNumber{S,L}(1,0)
+Base.one(::Type{LogNumber{S,L}}) where {S,L} = LogNumber{S,L}(1,0)
 
 Base.convert(::Type{LogNumber}, x::LogNumber) = x
-Base.convert(::Type{LogNumber{S,L}}, x::LogNumber) where {S<:Number,L<:Real} =
+Base.convert(::Type{LogNumber{S,L}}, x::LogNumber) where {S,L} =
     LogNumber{S,L}(x.sign,x.logabs)
-Base.convert(::Type{LogNumber}, x::Number) = LogNumber(sign(x),logabs(x))
-Base.convert(::Type{LogNumber{S,L}}, x::Number) where {S<:Number, L<:Real} =
+Base.convert(::Type{LogNumber}, x::Number) = LogNumber(float(sign(x)),logabs(x))
+Base.convert(::Type{LogNumber{S,L}}, x::Number) where {S,L} =
     LogNumber{S,L}(sign(x),logabs(x))
 Base.convert(::Type{T}, x::LogNumber) where {T<:Number} =
     convert(T,x.sign)*exp(convert(real(T),x.logabs))
 
-Base.promote_rule(::Type{LogNumber{S,L}}, ::Type{T}) where {S<:Number, L<:Real, T<:Number}=
+Base.promote_rule(::Type{LogNumber{S,L}}, ::Type{T}) where {S,L,T<:Number}=
     LogNumber{promote_type(S,T), promote_type(L,float(real(T)))}
+Base.promote_rule(::Type{LogNumber{S1,L1}}, ::Type{LogNumber{S2,L2}}) where {S1,L1,S2,L2}=
+    LogNumber{promote_type(S1,S2), promote_type(L1,L2)}
 
 Base.:*(x::LogNumber,y::LogNumber) = LogNumber(x.sign * y.sign, x.logabs + y.logabs)
 Base.:/(x::LogNumber,y::LogNumber) = LogNumber(x.sign * conj(y.sign), x.logabs - y.logabs)
