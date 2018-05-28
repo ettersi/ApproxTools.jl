@@ -26,9 +26,9 @@ function prodpot(x::Chebpoints)
     n = length(x)
     T = real(eltype(x))
 
-    n == 1 && return [LogNumber(1,T(0))]
+    n == 1 && return [one(lognumber(T))]
 
-    w = Vector{LogNumber{Int,T}}(undef,n)
+    w = Vector{lognumber(T)}(undef,n)
     w[1] = LogNumber(ifelse(isodd(n),1,-1), log(T(n-1)) - (n-3)*log(T(2)))
     for i = 2:n-1
         w[i] = LogNumber(ifelse(isodd(n-i+1),1,-1), log(T(n-1)) - (n-2)*log(T(2)))
