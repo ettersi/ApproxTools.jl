@@ -34,13 +34,10 @@ Base.float(x::LogNumber{S,L}) where {S,L} = convert(promote_type(S,L),x)
 Base.one(::Type{LogNumber{S,L}}) where {S,L} = LogNumber{S,L}(1,0)
 
 Base.convert(::Type{LogNumber}, x::LogNumber) = x
-Base.convert(::Type{LogNumber{S,L}}, x::LogNumber) where {S,L} =
-    LogNumber{S,L}(x.sign,x.logabs)
+Base.convert(::Type{LogNumber{S,L}}, x::LogNumber) where {S,L} = LogNumber{S,L}(x.sign,x.logabs)
 Base.convert(::Type{LogNumber}, x::Number) = LogNumber(float(sign(x)),logabs(x))
-Base.convert(::Type{LogNumber{S,L}}, x::Number) where {S,L} =
-    LogNumber{S,L}(sign(x),logabs(x))
-Base.convert(::Type{T}, x::LogNumber) where {T<:Number} =
-    convert(T,x.sign)*exp(convert(real(T),x.logabs))
+Base.convert(::Type{LogNumber{S,L}}, x::Number) where {S,L} = LogNumber{S,L}(sign(x),logabs(x))
+Base.convert(::Type{T}, x::LogNumber) where {T<:Union{AbstractFloat,Complex{<:AbstractFloat}}} = convert(T,x.sign)*exp(convert(real(T),x.logabs))
 
 Base.promote_rule(::Type{LogNumber{S,L}}, ::Type{T}) where {S,L,T<:Number}=
     LogNumber{promote_type(S,T), promote_type(L,float(real(T)))}
