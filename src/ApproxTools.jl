@@ -12,6 +12,6 @@ include("barycentric.jl")
 export Barycentric
 
 include("points.jl")
-export chebpoints
+export chebpoints, equipoints
 
 end # module

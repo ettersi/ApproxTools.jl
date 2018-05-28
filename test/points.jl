@@ -17,7 +17,7 @@
         end
     end
 
-    @testset "prodpot" begin
+    @testset "prodpot chebpoints" begin
         using ApproxTools: prodpot
         @testset for T in Floats, n = 1:5
             x = chebpoints(T,n)
@@ -25,6 +25,20 @@
             ŵ = prodpot(collect(x))
             @test convert.(float(real(T)),w) ≈ convert.(float(real(T)),ŵ)
         end
+    end
+
+    @testset "equipoints" begin
+        @testset for n = 1:5
+            @test equipoints(n,[]) ≈ chebpoints(n)
+        end
+
+        @test equipoints(5,[im]) ≈ [
+            -0.9999999999999929,
+            -0.682441158315747,
+             7.105427357601002e-15,
+             0.682441158315747,
+             0.9999999999999929
+        ]
     end
 
 end

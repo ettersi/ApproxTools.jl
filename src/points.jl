@@ -38,3 +38,29 @@ function prodpot(x::Chebpoints)
     return w
 end
 
+
+import ApproxFun, SingularIntegralEquations
+
+"""
+    equipoints(n::Integer, z::AbstractVector)
+
+Compute `n` points on `[-1,1]` distributed according to the equilibrium
+measure with poles `z`.
+
+# Note
+Unlike most functions in this package, this function returns a `Vector{Float64}`
+regardless of the input types.
+"""
+function equipoints(n::Integer, z::AbstractVector)
+    n == 1 && return [0.0]
+    n == 2 && return [-1.0,1.0]
+
+    AF = ApproxFun
+    SIE = SingularIntegralEquations
+
+    # Code idea by Sheehan Olver, bugs by Simon Etter
+    S = AF.JacobiWeight(-0.5,-0.5,AF.Chebyshev())
+    x = AF.Fun(identity)
+    μ = [AF.DefiniteIntegral(S), SIE.Hilbert(S)] \ [1, mapreduce(z->-real(1/(n*π*(x-z))), +, 0, z)]
+    return ApproxFun.bisectioninv.(cumsum(μ), linspace(0,1,n))
+end
