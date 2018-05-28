@@ -96,10 +96,9 @@ function extract_scale(x::AbstractVector)
 end
 
 
-struct Barycentric{X,P,S,W} <: Basis
+struct Barycentric{X,P,W} <: Basis
     points::X
     potential::P
-    scaling::S
     weights::W
 end
 
@@ -116,20 +115,19 @@ where
 
     x̃ = x[setdiff(1:n,k)]
 """
-Barycentric(x::AbstractVector, pot = one) =
-    Barycentric(x,pot, extract_scale(1 ./ (pot.(x) .* prodpot(x)))...)
+Barycentric(x::AbstractVector, pot = one) = Barycentric(x,pot,1./(pot.(x).*prodpot(x)))
 
 Base.length(b::Barycentric) = length(b.points)
-Base.eltype(::Type{Barycentric{X,P,S,W}},::Type{X̂}) where {X,P,S,W,X̂<:Number} = promote_type(eltype(W),X̂)
+Base.eltype(::Type{Barycentric{X,P,W}},::Type{X̂}) where {X,P,W,X̂<:Number} = promote_type(float(eltype(W)),X̂)
 interpolationpoints(b::Barycentric) = b.points
 
 
 function (b::Barycentric)(x̂::Number)
     x = b.points
     pot = b.potential
-    s = b.scaling
-    l = pot(x̂) * mapreduce(xi->s*(x̂-xi), *, one(promote_type(eltype.((s,x̂,x))...)), x)
-    return BarycentricValues(b,x̂,l,findfirst(x,x̂))
+    l = pot(x̂) * prodpot(x̂,x)
+    idx = findfirst(x,x̂)
+    return BarycentricValues(b,x̂,l,idx)
 end
 
 struct BarycentricValues{B,X,L,I}
@@ -151,7 +149,7 @@ function Base.next(bv::BarycentricValues, i)
     idx = bv.idx
 
     if idx == 0
-        bi = l * w[i] / (x̂ - x[i])
+        bi = float(l * w[i]) / (x̂ - x[i])
     else
         bi = i == idx ? one(eltype(bv)) : zero(eltype(bv))
     end
