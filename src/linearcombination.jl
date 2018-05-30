@@ -4,9 +4,7 @@
 Abstract supertype for sets of basis vectors.
 """
 abstract type Basis end
-
-Base.eltype(::Type{B},::Type{X̂}) where {B<:Basis,X̂<:AbstractVector} = eltype(B,eltype(X̂))
-Base.eltype(b::Basis,x̂::Union{Number,AbstractVector}) = eltype(typeof(b),typeof(x̂))
+Base.eltype(b::Basis,x̂::Number) = eltype(typeof(b),typeof(x̂))
 
 function interpolationpoints end
 
@@ -56,7 +54,7 @@ function evaluate(
 ) where {N}
     @assert size(c) == length.(b)
     tucker(c, map(b,x) do bk,xk
-        T = promote_type(eltype(c), eltype(bk,xk))
+        T = promote_type(eltype(c), eltype(typeof(bk),eltype(xk)))
         M = Matrix{T}(undef, length(bk),length(xk))
         for j = 1:length(xk)
             copyto!(@view(M[:,j]), bk(xk[j]))

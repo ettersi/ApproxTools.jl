@@ -109,15 +109,15 @@ function (b::Barycentric)(x̂::Number)
     return BarycentricValues(b,x̂,l,idx)
 end
 
-struct BarycentricValues{B,X,L,I}
+struct BarycentricValues{B,X̂,L,I}
     basis::B
-    point::X
+    point::X̂
     l::L
     idx::I
 end
 
 Base.length(bv::BarycentricValues) = length(bv.basis)
-Base.eltype(bv::BarycentricValues) = eltype(bv.basis,bv.point)
+Base.eltype(::Type{BarycentricValues{B,X̂,L,I}}) where {B,X̂,L,I} = eltype(B,X̂)
 Base.start(bv::BarycentricValues) = 1
 function Base.next(bv::BarycentricValues, i)
     b = bv.basis
