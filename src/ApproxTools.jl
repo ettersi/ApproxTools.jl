@@ -3,7 +3,7 @@ module ApproxTools
 using Compat
 
 include("tensor.jl")
-export tucker, cartesian, tensor, grideval
+export cartesian, tensor, grideval
 
 include("linearcombination.jl")
 export interpolate

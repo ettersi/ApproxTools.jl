@@ -1,6 +1,7 @@
 @testset "tensor" begin
 
     @testset "tucker" begin
+        using ApproxTools: tucker
         @testset for TC in rnc((Int,Float64)), TB in rnc((Int,Float64))
             C = TC[1,2]
             B = (TB[3 4; 5 6],)
