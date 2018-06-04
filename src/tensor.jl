@@ -16,7 +16,7 @@ true
 """
 function tucker(
     C::AbstractArray{<:Any,N},
-    B::NTuple{N,AbstractMatrix}
+    B::NTuple{N,Any}
 ) where {N}
     T = promote_type(eltype(C),eltype.(B)...)
     C = convert(Array{T,N},C)
