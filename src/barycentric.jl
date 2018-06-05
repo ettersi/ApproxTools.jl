@@ -107,19 +107,15 @@ function (b::Barycentric)(x̂::Number)
     w = b.weight
     l = w(x̂) * prodpot(x̂,x)
     idx = findfirst(x,x̂)
-    return BarycentricValues{eltype(b,x̂)}(b,x̂,l,idx)
+    return BarycentricValues(b,x̂,l,idx)
 end
 
-struct BarycentricValues{T,B,X̂,L,I} <: AbstractVector{T}
+struct BarycentricValues{B,X̂,L,I} <: BasisValues{B,X̂}
     basis::B
     evaluationpoint::X̂
     baryprod::L
     evaluationindex::I
 end
-BarycentricValues{T}(args...) where {T} = BarycentricValues{T,typeof.(args)...}(args...)
-
-Base.IndexStyle(::Type{<:BarycentricValues}) = Base.IndexLinear()
-Base.size(bv::BarycentricValues) = (length(bv.basis),)
 function Base.getindex(bv::BarycentricValues, i::Int)
     b = bv.basis
     x = b.interpolationpoints

@@ -7,6 +7,12 @@ Base.eltype(::Type{MockBasis{M}},::Type{<:Integer}) where {M} = eltype(M)
 ApproxTools.interpolationpoints(m::MockBasis) = 1:length(m)
 ApproxTools.interpolationtransform(m::MockBasis) = m.data[1:length(m),:]
 
+struct MockValues{M} <: ApproxTools.BasisValues{MockBasis{M}, Int}
+    basis::MockBasis{M}
+    evaluationpoint::Int
+end
+Base.getindex(m::MockValues,i) = m.basis.data[m.evaluationpoint,i]
+
 @testset "Basis" begin
     M = [
         1 2 3
@@ -24,6 +30,11 @@ ApproxTools.interpolationtransform(m::MockBasis) = m.data[1:length(m),:]
     p = @inferred(interpolate(*, (b,b)))
     @test coeffs(p) == M*(1:3)*(M*(1:3))'
     @test basis(p) == (b,b)
+
+    bv = MockValues(b,1)
+    @test length(bv) == length(b)
+    @test eltype(bv) == eltype(b,1)
+    @test collect(bv) == M[1,:]
 end
 
 @testset "LinearCombination" begin

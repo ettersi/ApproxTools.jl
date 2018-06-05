@@ -6,6 +6,13 @@ Abstract supertype for sets of basis vectors.
 abstract type Basis end
 Base.eltype(b::Basis,x̂::Number) = eltype(typeof(b),typeof(x̂))
 
+abstract type BasisValues{Basis, Evaluationpoint} end
+Base.length(bv::BasisValues) = length(bv.basis)
+Base.eltype(::Type{BasisValues{B,X̂}}) where {B,X̂} = eltype(B,X̂)
+Base.start(bv::BasisValues) = 1
+Base.next(bv::BasisValues, i) = bv[i], i+1
+Base.done(bv::BasisValues, i) = i > length(bv)
+
 function Base.collect(b::Basis,x::Union{Number,AbstractVector})
     T = promote_type(eltype(typeof(b),eltype(x)))
     M = Matrix{T}(undef, length(b),length(x))
