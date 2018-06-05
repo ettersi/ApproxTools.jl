@@ -5,7 +5,7 @@ end
 Base.length(m::MockBasis) = size(m.data,2)
 Base.eltype(::Type{MockBasis{M}},::Type{<:Integer}) where {M} = eltype(M)
 ApproxTools.interpolationpoints(m::MockBasis) = 1:length(m)
-ApproxTools.interpolationtransform(m::MockBasis) = m.data[1:length(m),:]
+ApproxTools.interpolationtransform(m::MockBasis) = f->m.data*f
 
 struct MockValues{M} <: ApproxTools.BasisValues{MockBasis{M}, Int}
     basis::MockBasis{M}

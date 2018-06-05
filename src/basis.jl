@@ -92,7 +92,7 @@ function evaluate_linear_combination(
     x::NTuple{N,Union{Number,AbstractVector}}
 ) where {N}
     @assert size(c) == length.(b)
-    tucker(c, map((b,x)->collect(b,x), b,x))
+    tucker(c, map((b,x)->(f->collect(b,x)*f), b,x))
 end
 
 (lc::LinearCombination{N})(x::Vararg{Union{Number,AbstractVector},N}) where {N} = lc(x)
