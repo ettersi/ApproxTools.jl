@@ -1,3 +1,6 @@
+apply(A::AbstractMatrix,B::AbstractMatrix) = A*B
+apply(f,B::AbstractMatrix) = f(B)
+
 """
     tucker(C,B)
 
@@ -14,20 +17,19 @@ julia> C = rand(2,3); B = (rand(4,2),rand(5,3));
 true
 ```
 """
-function tucker(
+@generated function tucker(
     C::AbstractArray{<:Any,N},
     B::NTuple{N,Any}
 ) where {N}
-    T = promote_type(eltype(C),eltype.(B)...)
-    C = convert(Array{T,N},C)
-    # Convert C to its final type here, otherwise type inference gets confused
-    for k = 1:N
-        tmp = reshape(C,(size(C,1),prod(Base.tail(size(C)))))
-        tmp = B[k]*tmp
-        C = reshape(convert(Array,transpose(tmp)),(Base.tail(size(C))...,size(B[k],1)))
-        # ^ Need to evaluate the transpose, otherwise type inference gets confused
+    quote
+        C_0 = C
+        Base.Cartesian.@nexprs $N k->begin
+            tmp_k = reshape(C_{k-1},(size(C_{k-1},1),prod(Base.tail(size(C_{k-1})))))
+            tmp_k = apply(B[k],tmp_k)
+            C_k = reshape(transpose(tmp_k),(Base.tail(size(C_{k-1}))...,size(tmp_k,1)))
+        end
+        return $(Symbol("C_",N))
     end
-    return C
 end
 
 """

@@ -75,10 +75,10 @@ function prodpot(x::AbstractVector)
 end
 
 
-struct Barycentric{X,P,W} <: Basis
-    points::X
-    potential::P
-    weights::W
+struct Barycentric{X,W,Λ} <: Basis
+    interpolationpoints::X
+    weight::W
+    baryweights::Λ
 end
 
 """
@@ -94,44 +94,43 @@ where
 
     x̃ = x[setdiff(1:n,k)]
 """
-Barycentric(x::AbstractVector, pot = one) = Barycentric(x,pot,1./(pot.(x).*prodpot(x)))
+Barycentric(x::AbstractVector, w = one) = Barycentric(x,w,1./(w.(x).*prodpot(x)))
 
-Base.length(b::Barycentric) = length(b.points)
-Base.eltype(::Type{Barycentric{X,P,W}},::Type{X̂}) where {X,P,W,X̂<:Number} = promote_type(float(eltype(W)),X̂)
-interpolationpoints(b::Barycentric) = b.points
+Base.length(b::Barycentric) = length(b.interpolationpoints)
+Base.eltype(::Type{Barycentric{X,W,Λ}},::Type{X̂}) where {X,W,Λ,X̂} = promote_type(float(eltype(Λ)),X̂)
 
+interpolationpoints(b::Barycentric) = b.interpolationpoints
+interpolationtransform(b::Barycentric) = identity
 
 function (b::Barycentric)(x̂::Number)
-    x = b.points
-    pot = b.potential
-    l = pot(x̂) * prodpot(x̂,x)
+    x = b.interpolationpoints
+    w = b.weight
+    l = w(x̂) * prodpot(x̂,x)
     idx = findfirst(x,x̂)
-    return BarycentricValues(b,x̂,l,idx)
+    return BarycentricValues{eltype(b,x̂)}(b,x̂,l,idx)
 end
 
-struct BarycentricValues{B,X̂,L,I}
+struct BarycentricValues{T,B,X̂,L,I} <: AbstractVector{T}
     basis::B
-    point::X̂
-    l::L
-    idx::I
+    evaluationpoint::X̂
+    baryprod::L
+    evaluationindex::I
 end
+BarycentricValues{T}(args...) where {T} = BarycentricValues{T,typeof.(args)...}(args...)
 
-Base.length(bv::BarycentricValues) = length(bv.basis)
-Base.eltype(::Type{BarycentricValues{B,X̂,L,I}}) where {B,X̂,L,I} = eltype(B,X̂)
-Base.start(bv::BarycentricValues) = 1
-function Base.next(bv::BarycentricValues, i)
+Base.IndexStyle(::Type{<:BarycentricValues}) = Base.IndexLinear()
+Base.size(bv::BarycentricValues) = (length(bv.basis),)
+function Base.getindex(bv::BarycentricValues, i::Int)
     b = bv.basis
-    x = b.points
-    w = b.weights
-    x̂ = bv.point
-    l = bv.l
-    idx = bv.idx
+    x = b.interpolationpoints
+    λ = b.baryweights
+    x̂ = bv.evaluationpoint
+    l = bv.baryprod
+    idx = bv.evaluationindex
 
     if idx == 0
-        bi = float(l * w[i]) / (x̂ - x[i])
+        return float(l * λ[i]) / (x̂ - x[i])
     else
-        bi = i == idx ? one(eltype(bv)) : zero(eltype(bv))
+        return i == idx ? one(eltype(bv)) : zero(eltype(bv))
     end
-    return bi, i+1
 end
-Base.done(bv::BarycentricValues, i) = i > length(bv)

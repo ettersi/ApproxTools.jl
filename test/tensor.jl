@@ -3,15 +3,17 @@
     @testset "tucker" begin
         using ApproxTools: tucker
         @testset for TC in rnc((Int,Float64)), TB in rnc((Int,Float64))
-            C = TC[1,2]
-            B = (TB[3 4; 5 6],)
-            @test @inferred(tucker(C,B)) == B[1]*C
+            C = rand(TC,2)
+            B = (rand(TB,2,2),)
+            @test @inferred(tucker(C,B)) ≈ B[1]*C
+            @test @inferred(tucker(C,map(B->(C->B*C),B))) ≈ B[1]*C
         end
 
         @testset for TC in rnc((Int,Float64)), TB1 in rnc((Int,Float64)), TB2 in rnc((Int,Float64))
-            C = TC[1 2; 3 4]
-            B = (TB1[5 6; 7 8], TB2[9 10; 11 12])
-            @test @inferred(tucker(C,B)) == B[1]*C*B[2]'
+            C = rand(TC,2,2)
+            B = (rand(TB1,2,2), rand(TB2,2,2))
+            @test @inferred(tucker(C,B)) ≈ B[1]*C*transpose(B[2])
+            @test @inferred(tucker(C,map(B->(C->B*C),B))) ≈ B[1]*C*transpose(B[2])
         end
     end
 

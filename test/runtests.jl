@@ -13,6 +13,6 @@ rnc(reals::Type) = (reals,complex.(reals))
 rnc(reals::Tuple) = (reals...,complex.(reals)...)
 
 include("tensor.jl")
-include("linearcombination.jl")
+include("basis.jl")
 include("barycentric.jl")
 include("points.jl")

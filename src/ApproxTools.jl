@@ -5,8 +5,8 @@ using Compat
 include("tensor.jl")
 export cartesian, tensor, grideval
 
-include("linearcombination.jl")
-export interpolate
+include("basis.jl")
+export interpolate, coeffs, basis
 
 include("barycentric.jl")
 export Barycentric
