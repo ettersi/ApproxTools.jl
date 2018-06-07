@@ -51,6 +51,22 @@
         @test eltype(grideval(*, (a,b))) == Float64
         @test collect(grideval(*,  a,b )) == [1. 2.; 2. 4.]
         @test collect(grideval(*, (a,b))) == [1. 2.; 2. 4.]
+
+        p = LinearCombination([0,1], Chebyshev(2))
+        @inferred grideval(p,  a )
+        @inferred grideval(p, (a,))
+        @test eltype(grideval(p,  a  )) == Int
+        @test eltype(grideval(p, (a,))) == Int
+        @test collect(grideval(p,  a  )) == [1,2]
+        @test collect(grideval(p, (a,))) == [1,2]
+
+        p = LinearCombination([0 0; 0 1], (Chebyshev(2),Chebyshev(2)))
+        @inferred grideval(p,  a,b )
+        @inferred grideval(p, (a,b))
+        @test eltype(grideval(p,  a,b )) == Float64
+        @test eltype(grideval(p, (a,b))) == Float64
+        @test collect(grideval(p,  a,b )) == [1. 2.; 2. 4.]
+        @test collect(grideval(p, (a,b))) == [1. 2.; 2. 4.]
     end
 
 end

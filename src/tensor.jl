@@ -67,3 +67,4 @@ julia> grideval(*, ([1,2],[3,4]))
 """
 grideval(f, x::AbstractVector...) = grideval(f,x)
 grideval(f, x::NTuple{N,AbstractVector}) where {N} = (x->f(x...)).(cartesian(x))
+grideval(f::LinearCombination{N}, x::NTuple{N,AbstractVector}) where {N} = f(x)

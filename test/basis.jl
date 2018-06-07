@@ -49,8 +49,8 @@ end
         @test @inferred(p((1,))) ≈ RowVector(B[1,:])*C
         @test @inferred(p( 2  )) ≈ RowVector(B[2,:])*C
 
-        @test_throws MethodError p( [1,2]  )
-        @test_throws MethodError p(([1,2],))
+        @test @inferred(p( [1,2]  )) ≈ B[1:2,:]*C
+        @test @inferred(p(([1,2],))) ≈ B[1:2,:]*C
     end
 
     @testset for TC in rnc((Int,Float64)), TB1 in rnc((Int,Float64)), TB2 in rnc((Int,Float64))

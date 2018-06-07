@@ -3,7 +3,7 @@ module ApproxTools
 using Compat
 
 include("basis.jl")
-export interpolate, coeffs, basis, Chebyshev
+export interpolate, coeffs, basis, LinearCombination, Chebyshev
 
 include("tensor.jl")
 export cartesian, tensor, grideval

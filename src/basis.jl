@@ -99,7 +99,7 @@ end
 (lc::LinearCombination{N})(x::NTuple{N,Number}) where {N} = evaluate_linear_combination(lc.coefficients, lc.basis, x)[1]
 (lc::LinearCombination{N})(x::NTuple{N,Union{Number,AbstractVector}}) where {N} = evaluate_linear_combination(lc.coefficients, lc.basis, x)
 (lc::LinearCombination{1})(x::NTuple{1,Number}) = evaluate_linear_combination(lc.coefficients, lc.basis[1], x[1])
-(lc::LinearCombination{1})(x::NTuple{1,AbstractVector}) = throw(MethodError(lc,x))
+(lc::LinearCombination{1})(x::NTuple{1,AbstractVector}) = lc.(x[1])
 
 
 
