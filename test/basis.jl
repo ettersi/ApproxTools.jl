@@ -81,3 +81,19 @@ end
         @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(A)) ≈ A
     end
 end
+
+@testset "Weighted" begin
+    using ApproxTools: interpolationpoints, interpolationtransform
+
+    b = Weighted(Chebyshev(5), x->exp(-x^2))
+    x = linspace(-1,1,11)
+    @test collect(b,x) ≈ exp.(-x.^2).*hcat(one.(x), x, @.(2x.^2-1), @.(4x^3-3x), @.(8x^4-8x^2+1))
+
+    @testset for n = 0:5, T = rnc((Int,Float32,Float64))
+        b = @inferred(Weighted(Chebyshev(n), x->exp(-x^2)))
+        a = rand(T,n)
+        @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(a)) ≈ a
+        A = rand(T,n,n)
+        @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(A)) ≈ A
+    end
+end

@@ -143,3 +143,37 @@ function Base.next(bv::ChebyshevValues, state)
     end
 end
 Base.done(bv::ChebyshevValues, state) = state[1] > length(bv)
+
+
+struct Weighted{B,W} <: Basis
+    basis::B
+    weight::W
+end
+
+Base.length(b::Weighted) = length(b.basis)
+
+interpolationpoints(b::Weighted) = interpolationpoints(b.basis)
+
+interpolationtransform(b::Weighted) = f->begin
+    basis = b.basis
+    w = b.weight
+    x = interpolationpoints(basis)
+    return interpolationtransform(basis)(f./w.(x))
+end
+
+(b::Weighted)(x̂::Number) = WeightedValues(b,x̂)
+
+struct WeightedValues{B,V,Ŵ} <: BasisValues
+    basis::B
+    values::V
+    evaluationweight::Ŵ
+end
+WeightedValues(b,x̂) =  WeightedValues(b,b.basis(x̂),b.weight(x̂))
+Base.eltype(::Type{WeightedValues{B,V,Ŵ}}) where {B,V,Ŵ} = promote_type(eltype(V),Ŵ)
+Base.start(bv::WeightedValues) = start(bv.values)
+function Base.next(bv::WeightedValues, state)
+    ŵ = bv.evaluationweight
+    p,state = next(bv.values,state)
+    return ŵ*p,state
+end
+Base.done(bv::WeightedValues, state) = done(bv.values,state)
