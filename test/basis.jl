@@ -3,7 +3,6 @@ struct MockBasis{M} <: ApproxTools.Basis
 end
 (m::MockBasis)(x) = @view m.data[x,:]
 Base.length(m::MockBasis) = size(m.data,2)
-Base.eltype(::Type{MockBasis{M}},::Type{<:Integer}) where {M} = eltype(M)
 ApproxTools.interpolationpoints(m::MockBasis) = 1:length(m)
 ApproxTools.interpolationtransform(m::MockBasis) = f->m.data*f
 
@@ -11,6 +10,7 @@ struct MockValues{M} <: ApproxTools.BasisValues{MockBasis{M}, Int}
     basis::MockBasis{M}
     evaluationpoint::Int
 end
+Base.eltype(::Type{MockValues{M}}) where {M} = eltype(M)
 Base.getindex(m::MockValues,i) = m.basis.data[m.evaluationpoint,i]
 
 @testset "Basis" begin
@@ -20,7 +20,6 @@ Base.getindex(m::MockValues,i) = m.basis.data[m.evaluationpoint,i]
         7 8 9
     ]
     b = MockBasis(M)
-    @test eltype(b,1) == eltype(typeof(b),Int)
     @test collect(b,2:3) == M[2:3,:]
 
     p = @inferred(interpolate(identity, b))
@@ -33,7 +32,7 @@ Base.getindex(m::MockValues,i) = m.basis.data[m.evaluationpoint,i]
 
     bv = MockValues(b,1)
     @test length(bv) == length(b)
-    @test eltype(bv) == eltype(b,1)
+    @test eltype(bv) == Int
     @test collect(bv) == M[1,:]
 end
 

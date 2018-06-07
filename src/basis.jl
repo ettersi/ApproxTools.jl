@@ -4,17 +4,15 @@
 Abstract supertype for sets of basis vectors.
 """
 abstract type Basis end
-Base.eltype(b::Basis,x̂::Number) = eltype(typeof(b),typeof(x̂))
 
 abstract type BasisValues{Basis, Evaluationpoint} end
 Base.length(bv::BasisValues) = length(bv.basis)
-Base.eltype(::Type{BasisValues{B,X̂}}) where {B,X̂} = eltype(B,X̂)
 Base.start(bv::BasisValues) = 1
 Base.next(bv::BasisValues, i) = bv[i], i+1
 Base.done(bv::BasisValues, i) = i > length(bv)
 
 function Base.collect(b::Basis,x::Union{Number,AbstractVector})
-    T = promote_type(eltype(typeof(b),eltype(x)))
+    T = promote_type(eltype(b(one(eltype(x)))))
     M = Matrix{T}(undef, length(b),length(x))
     for j = 1:length(x)
         copyto!(@view(M[:,j]), b(x[j]))
@@ -82,8 +80,9 @@ function evaluate_linear_combination(
     x::Number
 )
     @assert length(c) == length(b)
-    T = promote_type(eltype(c),eltype(b,x))
-    return mapreduce(p -> p[1]*p[2], +, zero(T), zip(c,b(x)))
+    bv = b(x)
+    T = promote_type(eltype(c),eltype(bv))
+    return mapreduce(p -> p[1]*p[2], +, zero(T), zip(c,bv))
 end
 
 function evaluate_linear_combination(
@@ -108,7 +107,6 @@ struct Chebyshev <: Basis
 end
 
 Base.length(b::Chebyshev) = b.n
-Base.eltype(::Type{Chebyshev},::Type{X̂}) where {X̂<:Number} = typeof(zero(X̂)*zero(X̂) + zero(X̂))
 
 interpolationpoints(b::Chebyshev) = chebpoints(b.n)
 
@@ -133,6 +131,7 @@ struct ChebyshevValues{X̂} <: BasisValues{Chebyshev,X̂}
     basis::Chebyshev
     evaluationpoint::X̂
 end
+Base.eltype(::Type{ChebyshevValues{X̂}}) where {X̂} = typeof(zero(X̂)*zero(X̂) + zero(X̂))
 Base.start(bv::ChebyshevValues) = 1,bv.evaluationpoint,bv.evaluationpoint
 function Base.next(bv::ChebyshevValues, state)
     x̂ = bv.evaluationpoint

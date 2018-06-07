@@ -97,7 +97,6 @@ where
 Barycentric(x::AbstractVector, w = one) = Barycentric(x,w,1./(w.(x).*prodpot(x)))
 
 Base.length(b::Barycentric) = length(b.interpolationpoints)
-Base.eltype(::Type{Barycentric{X,W,Λ}},::Type{X̂}) where {X,W,Λ,X̂} = promote_type(float(eltype(Λ)),X̂)
 
 interpolationpoints(b::Barycentric) = b.interpolationpoints
 interpolationtransform(b::Barycentric) = identity
@@ -116,6 +115,7 @@ struct BarycentricValues{B,X̂,L,I} <: BasisValues{B,X̂}
     baryprod::L
     evaluationindex::I
 end
+Base.eltype(::Type{BarycentricValues{B,X̂,L,I}}) where {B,X̂,L,I} = float(L)
 function Base.getindex(bv::BarycentricValues, i::Int)
     b = bv.basis
     x = b.interpolationpoints

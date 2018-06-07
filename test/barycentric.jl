@@ -68,8 +68,8 @@
 
         b = @inferred(Barycentric(x))
         @test length(b) == 3
-        @test eltype(b,1) == Float64
-        @test eltype(b,1im) == ComplexF64
+        @test eltype(b(1)) == Float64
+        @test eltype(b(1im)) == ComplexF64
         @test interpolationpoints(b) == x
         bv = @inferred(b(xx))
         @test length(bv) == 3
