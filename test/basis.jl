@@ -69,6 +69,11 @@ end
 
 @testset "Chebyshev" begin
     using ApproxTools: interpolationpoints, interpolationtransform
+
+    b = Chebyshev(5)
+    x = linspace(-1,1,11)
+    @test collect(b,x) ≈ hcat(one.(x), x, @.(2x.^2-1), @.(4x^3-3x), @.(8x^4-8x^2+1))
+
     @testset for n = 0:5, T = rnc((Int,Float32,Float64))
         b = @inferred(Chebyshev(n))
         a = rand(T,n)
