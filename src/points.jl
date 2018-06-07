@@ -62,5 +62,5 @@ function equipoints(n::Integer, z::AbstractVector)
     S = AF.JacobiWeight(-0.5,-0.5,AF.Chebyshev())
     x = AF.Fun(identity)
     μ = [AF.DefiniteIntegral(S), SIE.Hilbert(S)] \ [1, mapreduce(z->-real(1/(n*π*(x-z))), +, 0, z)]
-    return ApproxFun.bisectioninv.(cumsum(μ), linspace(0,1,n))
+    return ApproxFun.bisectioninv.(cumsum(μ), linspace(0,1,n))::Array{Float64,1}
 end

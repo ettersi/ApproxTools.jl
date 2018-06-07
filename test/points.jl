@@ -29,10 +29,10 @@
 
     @testset "equipoints" begin
         @testset for n = 1:5
-            @test equipoints(n,[]) ≈ chebpoints(n)
+            @test @inferred(equipoints(n,[])) ≈ chebpoints(n)
         end
 
-        @test equipoints(5,[im]) ≈ [
+        @test @inferred(equipoints(5,[im])) ≈ [
             -0.9999999999999929,
             -0.682441158315747,
              7.105427357601002e-15,
