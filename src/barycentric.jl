@@ -109,7 +109,7 @@ function (b::Barycentric)(x̂::Number)
     return BarycentricValues(b,x̂,l,idx)
 end
 
-struct BarycentricValues{B,X̂,L,I} <: BasisValues{B,X̂}
+struct BarycentricValues{B,X̂,L,I} <: BasisValues
     basis::B
     evaluationpoint::X̂
     baryprod::L

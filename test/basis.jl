@@ -6,7 +6,7 @@ Base.length(m::MockBasis) = size(m.data,2)
 ApproxTools.interpolationpoints(m::MockBasis) = 1:length(m)
 ApproxTools.interpolationtransform(m::MockBasis) = f->m.data*f
 
-struct MockValues{M} <: ApproxTools.BasisValues{MockBasis{M}, Int}
+struct MockValues{M} <: ApproxTools.BasisValues
     basis::MockBasis{M}
     evaluationpoint::Int
 end

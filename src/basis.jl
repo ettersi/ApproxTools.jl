@@ -5,7 +5,7 @@ Abstract supertype for sets of basis vectors.
 """
 abstract type Basis end
 
-abstract type BasisValues{Basis, Evaluationpoint} end
+abstract type BasisValues end
 Base.length(bv::BasisValues) = length(bv.basis)
 Base.start(bv::BasisValues) = 1
 Base.next(bv::BasisValues, i) = bv[i], i+1
@@ -127,7 +127,7 @@ end
 
 (b::Chebyshev)(x̂::Number) = ChebyshevValues(b,x̂)
 
-struct ChebyshevValues{X̂} <: BasisValues{Chebyshev,X̂}
+struct ChebyshevValues{X̂} <: BasisValues
     basis::Chebyshev
     evaluationpoint::X̂
 end
