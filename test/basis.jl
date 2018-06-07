@@ -66,3 +66,14 @@ end
         @test @inferred(p((1:2,1:2))) ≈ B[1][1:2,:]*C*transpose(B[2][1:2,:])
     end
 end
+
+@testset "Chebyshev" begin
+    using ApproxTools: interpolationpoints, interpolationtransform
+    @testset for n = 0:5, T = rnc((Int,Float32,Float64))
+        b = @inferred(Chebyshev(n))
+        a = rand(T,n)
+        @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(a)) ≈ a
+        A = rand(T,n,n)
+        @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(A)) ≈ A
+    end
+end

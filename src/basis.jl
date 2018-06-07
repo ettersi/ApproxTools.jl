@@ -100,3 +100,47 @@ end
 (lc::LinearCombination{N})(x::NTuple{N,Union{Number,AbstractVector}}) where {N} = evaluate_linear_combination(lc.coefficients, lc.basis, x)
 (lc::LinearCombination{1})(x::NTuple{1,Number}) = evaluate_linear_combination(lc.coefficients, lc.basis[1], x[1])
 (lc::LinearCombination{1})(x::NTuple{1,AbstractVector}) = throw(MethodError(lc,x))
+
+
+
+struct Chebyshev <: Basis
+    n::Int
+end
+
+Base.length(b::Chebyshev) = b.n
+Base.eltype(::Type{Chebyshev},::Type{X̂}) where {X̂<:Number} = typeof(zero(X̂)*zero(X̂) + zero(X̂))
+
+interpolationpoints(b::Chebyshev) = chebpoints(b.n)
+
+using FFTW
+fftwtype(::Type{T}) where {T <: FFTW.fftwNumber} = T
+fftwtype(::Type{T}) where {T <: Real} = Float64
+fftwtype(::Type{T}) where {T <: Complex} = ComplexF64
+interpolationtransform(b::Chebyshev) = f->begin
+    n = length(b)
+    T = fftwtype(eltype(f))
+    n == 0 && return Array{T}(undef, size(f))
+    n == 1 && return convert(Array{T},f)
+    c = r2r(f,REDFT00,1)
+    d = (real(T)(1)/(n-1)).*(i->isodd(i) ? 1 : -1).(1:n)
+    d[1] /= 2; d[end] /= 2
+    return Diagonal(d)*c
+end
+
+(b::Chebyshev)(x̂::Number) = ChebyshevValues(b,x̂)
+
+struct ChebyshevValues{X̂} <: BasisValues{Chebyshev,X̂}
+    basis::Chebyshev
+    evaluationpoint::X̂
+end
+Base.start(bv::ChebyshevValues) = 1,bv.evaluationpoint,bv.evaluationpoint
+function Base.next(bv::ChebyshevValues, state)
+    x̂ = bv.evaluationpoint
+    i,T0,T1 = state
+    if i == 1
+        return one(x̂),(i+1,one(x̂),x̂)
+    else
+        return T1, ( i+1, T1, 2x̂*T1-T0 )
+    end
+end
+Base.done(bv::ChebyshevValues, state) = state[1] > length(bv)
