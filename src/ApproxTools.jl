@@ -9,7 +9,7 @@ include("tensor.jl")
 export cartesian, tensor, grideval
 
 include("barycentric.jl")
-export Barycentric
+export Barycentric, prodpot
 
 include("points.jl")
 export chebpoints, equipoints
