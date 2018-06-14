@@ -55,12 +55,10 @@ function equipoints(n::Integer, z::AbstractVector)
     n == 1 && return [0.0]
     n == 2 && return [-1.0,1.0]
 
-    AF = ApproxFun
-    SIE = SingularIntegralEquations
-
     # Code idea by Sheehan Olver, bugs by Simon Etter
-    S = AF.JacobiWeight(-0.5,-0.5,AF.Chebyshev())
-    x = AF.Fun(identity)
-    μ = [AF.DefiniteIntegral(S), SIE.Hilbert(S)] \ [1, mapreduce(z->-real(1/(n*π*(x-z))), +, 0, z)]
-    return AF.bisectioninv.(cumsum(μ), linspace(0,1,n))::Array{Float64,1}
+    S = ApproxFun.JacobiWeight(-0.5,-0.5,ApproxFun.Chebyshev())
+    x = ApproxFun.Fun(identity)
+    μ = [ApproxFun.DefiniteIntegral(S), SingularIntegralEquations.Hilbert(S)] \
+            [1, mapreduce(z->-real(1/(n*π*(x-z))), +, 0, z)]
+    return ApproxFun.bisectioninv.(cumsum(μ), linspace(0,1,n))::Array{Float64,1}
 end
