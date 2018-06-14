@@ -14,4 +14,7 @@ export Barycentric, prodpot
 include("points.jl")
 export chebpoints, equipoints
 
+include("bernstein.jl")
+export rsmo, jouk, ijouk, semimajor, semiminor
+
 end # module
