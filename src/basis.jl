@@ -73,6 +73,8 @@ LinearCombination(c::AbstractArray{<:Number,1},b::Basis) = LinearCombination(c,(
 
 coeffs(c::LinearCombination) = c.coefficients
 basis(c::LinearCombination) = c.basis
+Base.ndims(c::LinearCombination{N}) where {N} = N
+Base.ndims(::Type{<:LinearCombination{N}}) where {N} = N
 
 function evaluate_linear_combination(
     c::AbstractVector,

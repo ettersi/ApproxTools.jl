@@ -44,6 +44,7 @@ end
         B = rand(TB,2,2)
 
         p = @inferred(LinearCombination(C, MockBasis(B)))
+        @test ndims(p) == ndims(typeof(p)) == 1
         @test @inferred(p( 1  )) ≈ RowVector(B[1,:])*C
         @test @inferred(p((1,))) ≈ RowVector(B[1,:])*C
         @test @inferred(p( 2  )) ≈ RowVector(B[2,:])*C
@@ -57,6 +58,7 @@ end
         B = (rand(TB1,2,2), rand(TB2,2,2))
 
         p = @inferred(LinearCombination(C, MockBasis.(B)))
+        @test ndims(p) == ndims(typeof(p)) == 2
         @test @inferred(p( 1,1 )) ≈ RowVector(B[1][1,:])*C*B[2][1,:]
         @test @inferred(p((1,1))) ≈ RowVector(B[1][1,:])*C*B[2][1,:]
         @test @inferred(p( 1,1:2 )) ≈ RowVector(B[1][1,:])*C*transpose(B[2][1:2,:])
