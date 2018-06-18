@@ -1,16 +1,16 @@
 """
     tucker(C,B)
 
-Multiply each side of tensor `C` with the corresponding matrix `B[k]`.
+Apply `B[k]` to the `k`th dimension of tensor `C`.
 
 # Examples
 ```
 julia> C = rand(2); B = (rand(3,2),);
-       tucker(C,B) == B[1]*C
+       tucker(C,(B->(C->B*C)).(B)) == B[1]*C
 true
 
 julia> C = rand(2,3); B = (rand(4,2),rand(5,3));
-       tucker(C,B) == B[1]*C*B[2]'
+       tucker(C,(B->(C->B*C)).(B)) == B[1]*C*B[2]'
 true
 ```
 """
