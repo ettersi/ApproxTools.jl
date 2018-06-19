@@ -30,28 +30,6 @@ true
 end
 
 """
-    cartesian(x::AbstractVector...)
-    cartesian(x::NTuple{N,AbstractVector})
-
-Cartesian product.
-
-# Examples
-```
-julia> cartesian([1,2],[3,4])
-2×2 ApproxTools.TensorGrid{...}:
- (1, 3)  (1, 4)
- (2, 3)  (2, 4)
-```
-"""
-cartesian(x::AbstractVector...) = cartesian(x)
-cartesian(x::NTuple{N,AbstractVector}) where {N} = TensorGrid{Tuple{eltype.(x)...},length(x),typeof(x)}(x)
-struct TensorGrid{T,N,F} <: AbstractArray{T,N}
-    factors::F
-end
-Base.size(x::TensorGrid) = length.(x.factors)
-Base.getindex(x::TensorGrid{<:Any,N,<:Any}, i::Vararg{Int,N}) where {N} = map(getindex,x.factors,i)
-
-"""
     grideval(f, x::AbstractVector...)
     grideval(f, x::NTuple{N,AbstractVector})
 

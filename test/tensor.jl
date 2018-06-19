@@ -15,25 +15,6 @@
         end
     end
 
-    @testset "cartesian" begin
-        a = [1,2]
-        b = [1.,2.]
-
-        @inferred cartesian( a  )
-        @inferred cartesian((a,))
-        @test eltype(cartesian( a  )) == Tuple{Int}
-        @test eltype(cartesian((a,))) == Tuple{Int}
-        @test collect(cartesian( a  )) == [(1,),(2,)]
-        @test collect(cartesian((a,))) == [(1,),(2,)]
-
-        @inferred cartesian( a,b )
-        @inferred cartesian((a,b))
-        @test eltype(cartesian( a,b )) == Tuple{Int,Float64}
-        @test eltype(cartesian((a,b))) == Tuple{Int,Float64}
-        @test collect(cartesian( a,b )) == [(1,1.) (1,2.); (2,1.) (2,2.)]
-        @test collect(cartesian((a,b))) == [(1,1.) (1,2.); (2,1.) (2,2.)]
-    end
-
     @testset "grideval" begin
         a = [1,2]
         b = [1.,2.]
