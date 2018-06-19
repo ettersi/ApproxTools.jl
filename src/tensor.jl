@@ -66,5 +66,11 @@ julia> grideval(*, ([1,2],[3,4]))
 ```
 """
 grideval(f, x::AbstractVector...) = grideval(f,x)
-grideval(f, x::NTuple{N,AbstractVector}) where {N} = (x->f(x...)).(cartesian(x))
+@generated grideval(f, x::NTuple{N,AbstractVector}) where {N} = :(Base.Cartesian.@ncall($N,broadcast,f,i->reshape(x[i],shape(x,i))))
 grideval(f::LinearCombination{N}, x::NTuple{N,AbstractVector}) where {N} = f(x)
+
+# Utility function for grideval
+# x is only used for its length. It would be cleaner to pass Val(N) instead, but unlike
+# Base.tail, Val(N-1) is not type-stable.
+shape(x::NTuple{N,Any},i) where {N} = (shape(Base.tail(x),i)..., i == N ? length(x[i]) : 1)
+shape(::NTuple{0},i) = ()
