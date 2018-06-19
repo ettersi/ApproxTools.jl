@@ -37,8 +37,6 @@ Base.getindex(m::MockValues,i) = m.basis.data[m.evaluationpoint,i]
 end
 
 @testset "LinearCombination" begin
-    using ApproxTools: LinearCombination
-
     @testset for TC in rnc((Int,Float64)), TB in rnc((Int,Float64))
         C = rand(TC,2)
         B = rand(TB,2,2)
@@ -66,6 +64,23 @@ end
         @test @inferred(p((1,1:2))) ≈ RowVector(B[1][1,:])*C*transpose(B[2][1:2,:])
         @test @inferred(p( 1:2,1:2 )) ≈ B[1][1:2,:]*C*transpose(B[2][1:2,:])
         @test @inferred(p((1:2,1:2))) ≈ B[1][1:2,:]*C*transpose(B[2][1:2,:])
+    end
+end
+
+@testset "Semiseparated" begin
+    @testset for TC in rnc((Int,Float64)), TB1 in rnc((Int,Float64)), TB2 in rnc((Int,Float64))
+        C = rand(TC,2,2)
+        B = (rand(TB1,2,2), rand(TB2,2,2))
+
+        p = @inferred(Semiseparated(*,(x->x+1,x->x-1)))
+        @test ApproxTools.GridevalStyle(p) == ApproxTools.GridevalCartesian()
+        @test ndims(p) == ndims(typeof(p)) == 2
+        @test @inferred(p( 1,1 )) ≈ 0
+        @test @inferred(p((1,1))) ≈ 0
+        @test @inferred(p( 1,1:2 )) ≈ [0 4]
+        @test @inferred(p((1,1:2))) ≈ [0 4]
+        @test @inferred(p( 1:2,1:2 )) ≈ [0 4; 0 12]
+        @test @inferred(p((1:2,1:2))) ≈ [0 4; 0 12]
     end
 end
 

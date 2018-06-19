@@ -105,6 +105,33 @@ end
 
 
 
+struct Semiseparated{N, C, F<:NTuple{N,Any}}
+    core::C
+    factors::F
+end
+
+"""
+    Semiseparated(c,f)
+
+Representation of the function `c(x1,x2,...) * f[1](x1) * f[2](x2) * ...`.
+"""
+Semiseparated(c, f::NTuple{N,Any}) where {N} = Semiseparated{N,typeof(c),typeof(f)}(c,f)
+
+Base.ndims(::Semiseparated{N}) where {N} = N
+Base.ndims(::Type{<:Semiseparated{N}}) where {N} = N
+GridevalStyle(::Type{<:Semiseparated}) = GridevalCartesian()
+
+(s::Semiseparated{N})(x::Vararg{Union{Number,AbstractVector},N}) where {N} = s(x)
+@generated (s::Semiseparated{N})(x::NTuple{N,Number}) where {N} =
+    :(Base.Cartesian.@ncall($N,*,s.core(x...), i->s.factors[i](x[i])))
+@generated (s::Semiseparated{N})(x::NTuple{N,Union{Number,AbstractVector}}) where {N} =
+    :(tucker(grideval(s.core,x), Base.Cartesian.@ntuple($N,i->semiseparated_transform(s.factors[i],x[i]))))
+
+semiseparated_transform(f,x::Number) = c->f(x)*c
+semiseparated_transform(f,x::AbstractVector) = c->Diagonal(f.(x))*c
+
+
+
 struct Chebyshev <: Basis
     n::Int
 end
