@@ -2,11 +2,11 @@ module ApproxTools
 
 using Compat
 
-include("basis.jl")
-export interpolate, coeffs, basis, LinearCombination, Chebyshev, Weighted
-
 include("tensor.jl")
 export cartesian, tensor, grideval
+
+include("basis.jl")
+export interpolate, coeffs, basis, LinearCombination, Chebyshev, Weighted
 
 include("barycentric.jl")
 export Barycentric, prodpot

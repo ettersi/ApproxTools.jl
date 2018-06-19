@@ -29,6 +29,13 @@ true
     end
 end
 
+
+abstract type GridevalStyle end
+GridevalStyle(f) = GridevalStyle(typeof(f))
+GridevalStyle(::Type) = GridevalElementwise()
+struct GridevalElementwise <: GridevalStyle end
+struct GridevalCartesian <: GridevalStyle end
+
 """
     grideval(f, x::AbstractVector...)
     grideval(f, x::NTuple{N,AbstractVector})
@@ -43,12 +50,14 @@ julia> grideval(*, ([1,2],[3,4]))
  6  8
 ```
 """
-grideval(f, x::AbstractVector...) = grideval(f,x)
-@generated grideval(f, x::NTuple{N,AbstractVector}) where {N} = :(Base.Cartesian.@ncall($N,broadcast,f,i->reshape(x[i],shape(x,i))))
-grideval(f::LinearCombination{N}, x::NTuple{N,AbstractVector}) where {N} = f(x)
+grideval(f, x::Union{Number,AbstractVector}...) = grideval(f,x)
+grideval(f, x::NTuple{N,Union{Number,AbstractVector}}) where {N} = grideval(GridevalStyle(f), f, x)
+@generated grideval(::GridevalElementwise, f, x::NTuple{N,Union{Number,AbstractVector}}) where {N} =
+    :(Base.Cartesian.@ncall($N,broadcast,f,i->reshape4grideval(x[i],x,i)))
+grideval(::GridevalCartesian, f, x::NTuple{N,Union{Number,AbstractVector}}) where {N} = f(x)
 
-# Utility function for grideval
-# x is only used for its length. It would be cleaner to pass Val(N) instead, but unlike
-# Base.tail, Val(N-1) is not type-stable.
-shape(x::NTuple{N,Any},i) where {N} = (shape(Base.tail(x),i)..., i == N ? length(x[i]) : 1)
-shape(::NTuple{0},i) = ()
+reshape4grideval(xi::Number,x,i) = xi
+reshape4grideval(xi::AbstractVector,x,i) = reshape(xi,gridevalshape(x,i))
+
+gridevalshape(x::NTuple{N,Any},i) where {N} = (i == 1 ? length(x[1]) : 1, gridevalshape(Base.tail(x),i-1)...)
+gridevalshape(::NTuple{0},i) = ()

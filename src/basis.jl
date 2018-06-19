@@ -70,6 +70,7 @@ function LinearCombination end
 LinearCombination(c::AbstractArray{<:Number,N},b::NTuple{N,Basis}) where {N} =
     LinearCombination{N,typeof(c),typeof(b)}(c,b)
 LinearCombination(c::AbstractArray{<:Number,1},b::Basis) = LinearCombination(c,(b,))
+GridevalStyle(::Type{<:LinearCombination}) = GridevalCartesian()
 
 coeffs(c::LinearCombination) = c.coefficients
 basis(c::LinearCombination) = c.basis

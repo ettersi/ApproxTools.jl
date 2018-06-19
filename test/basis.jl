@@ -44,6 +44,7 @@ end
         B = rand(TB,2,2)
 
         p = @inferred(LinearCombination(C, MockBasis(B)))
+        @test ApproxTools.GridevalStyle(p) == ApproxTools.GridevalCartesian()
         @test ndims(p) == ndims(typeof(p)) == 1
         @test @inferred(p( 1  )) ≈ RowVector(B[1,:])*C
         @test @inferred(p((1,))) ≈ RowVector(B[1,:])*C
