@@ -156,20 +156,54 @@ interpolationtransform(b::Chebyshev) = f->begin
 end
 
 (b::Chebyshev)(x̂::Number) = ChebyshevValues(b,x̂)
-
+(b::Chebyshev)(M::AbstractMatrix) = ChebyshevValues(b,M)
+(b::Chebyshev)(M::AbstractMatrix,v::AbstractVector) = ChebyshevValues(b,(M,v))
 struct ChebyshevValues{X̂} <: BasisValues
     basis::Chebyshev
     evaluationpoint::X̂
 end
-Base.eltype(::Type{ChebyshevValues{X̂}}) where {X̂} = typeof(zero(X̂)*zero(X̂) + zero(X̂))
-Base.start(bv::ChebyshevValues) = 1,bv.evaluationpoint,bv.evaluationpoint
+Base.eltype(::Type{ChebyshevValues{X̂}}) where {X̂<:Number} = typeof(zero(X̂)*zero(X̂) + zero(X̂))
+function Base.eltype(::Type{ChebyshevValues{M}}) where {M<:AbstractMatrix}
+    # Make sure matrix type is closed under multiplication
+    @assert Base.return_types(*,Tuple{M,M}) == [M]
+    return M
+end
+function Base.eltype(::Type{ChebyshevValues{Tuple{M,V}}}) where {M<:AbstractMatrix,V<:AbstractVector}
+    # Make sure vector type is closed under multiplication with matrix
+    @assert Base.return_types(*,Tuple{M,V}) == [V]
+    return V
+end
+
+module ChebUtils
+    dummyval(x::Union{Number,AbstractMatrix}) = x
+    dummyval(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
+
+    startval(x::Number) = one(x)
+    startval(x::AbstractMatrix) = eye(x)
+    startval(x::Diagonal) = Diagonal(one.(diag(x)))
+    startval(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
+
+    xval(x::Union{Number,AbstractMatrix}) = x
+    xval(x::Tuple{AbstractMatrix,AbstractVector}) = x[1]
+end
+
+function Base.start(bv::ChebyshevValues)
+    x̂ = bv.evaluationpoint
+    val = ChebUtils.dummyval(x̂)
+    return 1,val,val
+end
 function Base.next(bv::ChebyshevValues, state)
     x̂ = bv.evaluationpoint
     i,T0,T1 = state
     if i == 1
-        return one(x̂),(i+1,one(x̂),x̂)
+        T0,T1 = T1,ChebUtils.startval(x̂)
+        return T1,(i+1,T0,T1)
+    elseif i == 2
+        T0,T1 = T1,ChebUtils.xval(x̂)*T1
+        return T1,(i+1,T0,T1)
     else
-        return T1, ( i+1, T1, 2x̂*T1-T0 )
+        T0,T1 = T1, 2*ChebUtils.xval(x̂)*T1 - T0
+        return T1,(i+1,T0,T1)
     end
 end
 Base.done(bv::ChebyshevValues, state) = state[1] > length(bv)

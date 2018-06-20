@@ -89,7 +89,18 @@ end
 
     b = Chebyshev(5)
     x = linspace(-1,1,11)
-    @test collect(b,x) ≈ hcat(one.(x), x, @.(2x.^2-1), @.(4x^3-3x), @.(8x^4-8x^2+1))
+    chebpolys = [one.(x), x, @.(2x.^2-1), @.(4x^3-3x), @.(8x^4-8x^2+1)]
+    v = rand(length(x))
+    @test collect(b,x) ≈ hcat(chebpolys...)
+    @test all(collect(b(full(Diagonal(x)))) .≈ Diagonal.(chebpolys))
+    @test all(collect(b(Diagonal(x))) .≈ Diagonal.(chebpolys))
+    @test all(collect(b(Diagonal(x),v)) .≈ Diagonal.(chebpolys).*(v,))
+
+    for bv = (@inferred(b(0)), @inferred(b(zeros(2,2))), @inferred(b(zeros(2,2),zeros(2))))
+        bvs = @inferred start(bv)
+        _,bvs = @inferred next(bv,bvs)
+        @inferred done(bv,bvs)
+    end
 
     @testset for n = 0:5, T = rnc((Int,Float32,Float64))
         b = @inferred(Chebyshev(n))
