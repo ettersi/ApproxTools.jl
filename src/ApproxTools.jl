@@ -17,4 +17,7 @@ export chebpoints, equipoints
 include("bernstein.jl")
 export rsmo, jouk, ijouk, semimajor, semiminor
 
+include("fnorm.jl")
+export fnorm
+
 end # module
