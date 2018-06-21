@@ -77,6 +77,43 @@ basis(c::LinearCombination) = c.basis
 Base.ndims(c::LinearCombination{N}) where {N} = N
 Base.ndims(::Type{<:LinearCombination{N}}) where {N} = N
 
+"""
+    module Utils
+
+Utility functions for abstracting away the differences between
+scalar and matrix types.
+"""
+module Utils
+    scalartype(::Type{T}) where {T <: Number} = T
+    scalartype(::Type{T}) where {T <: AbstractArray} = eltype(T)
+
+    dummy(x::Union{Number,AbstractMatrix}) = x
+    dummy(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
+
+    zero(::Type{T}, x::Number) where {T} = Base.zero(T)
+    zero(::Type{T}, x::AbstractMatrix) where {T} = zeros(T,size(x))
+    zero(::Type{T}, x::Tuple{AbstractMatrix,AbstractVector}) where {T} = zeros(T,length(x[2]))
+
+    one(x::Number) = one(x)
+    one(x::AbstractMatrix) = eye(x)
+    one(x::Diagonal) = Diagonal(one.(diag(x)))
+    one(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
+
+    xval(x::Union{Number,AbstractMatrix}) = x
+    xval(x::Tuple{AbstractMatrix,AbstractVector}) = x[1]
+
+    function basis_eltype(::Type{M}) where {M <: AbstractMatrix}
+        # Make sure matrix type is closed under multiplication
+        @assert Base.return_types(*,Tuple{M,M}) == [M]
+        return M
+    end
+    function basis_eltype(::Type{Tuple{M,V}}) where {M<:AbstractMatrix,V<:AbstractVector}
+        # Make sure vector type is closed under multiplication with matrix
+        @assert Base.return_types(*,Tuple{M,V}) == [V]
+        return V
+    end
+end
+
 function evaluate_linear_combination(
     c::AbstractVector,
     b::Basis,
@@ -131,6 +168,39 @@ semiseparated_transform(f,x::Number) = c->f(x)*c
 semiseparated_transform(f,x::AbstractVector) = c->Diagonal(f.(x))*c
 
 
+struct Monomial <: Basis
+    n::Int
+end
+
+Base.length(b::Monomial) = b.n
+
+(b::Monomial)(x̂::Union{Number,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}) = MonomialValues(b,x̂)
+(b::Monomial)(M::AbstractMatrix,v::AbstractVector) = b((M,v))
+
+struct MonomialValues{X̂} <: BasisValues
+    basis::Monomial
+    evaluationpoint::X̂
+end
+Base.eltype(::Type{MonomialValues{X̂}}) where {X̂<:Number} = typeof(zero(X̂)*zero(X̂))
+Base.eltype(::Type{MonomialValues{X̂}}) where {X̂<:Union{AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}} = Utils.basis_eltype(X̂)
+
+function Base.start(bv::MonomialValues)
+    x̂ = bv.evaluationpoint
+    return 1,Utils.dummy(x̂)
+end
+function Base.next(bv::MonomialValues, state)
+    x̂ = bv.evaluationpoint
+    i,p = state
+    if i == 1
+        p = Utils.one(x̂)
+        return p,(i+1,p)
+    else
+        p = Utils.xval(x̂)*p
+        return p,(i+1,p)
+    end
+end
+Base.done(bv::MonomialValues, state) = state[1] > length(bv)
+
 
 struct Chebyshev <: Basis
     n::Int
@@ -155,54 +225,31 @@ interpolationtransform(b::Chebyshev) = f->begin
     return Diagonal(d)*c
 end
 
-(b::Chebyshev)(x̂::Number) = ChebyshevValues(b,x̂)
-(b::Chebyshev)(M::AbstractMatrix) = ChebyshevValues(b,M)
-(b::Chebyshev)(M::AbstractMatrix,v::AbstractVector) = ChebyshevValues(b,(M,v))
+(b::Chebyshev)(x̂::Union{Number,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}) = ChebyshevValues(b,x̂)
+(b::Chebyshev)(M::AbstractMatrix,v::AbstractVector) = b((M,v))
 struct ChebyshevValues{X̂} <: BasisValues
     basis::Chebyshev
     evaluationpoint::X̂
 end
 Base.eltype(::Type{ChebyshevValues{X̂}}) where {X̂<:Number} = typeof(zero(X̂)*zero(X̂) + zero(X̂))
-function Base.eltype(::Type{ChebyshevValues{M}}) where {M<:AbstractMatrix}
-    # Make sure matrix type is closed under multiplication
-    @assert Base.return_types(*,Tuple{M,M}) == [M]
-    return M
-end
-function Base.eltype(::Type{ChebyshevValues{Tuple{M,V}}}) where {M<:AbstractMatrix,V<:AbstractVector}
-    # Make sure vector type is closed under multiplication with matrix
-    @assert Base.return_types(*,Tuple{M,V}) == [V]
-    return V
-end
-
-module ChebUtils
-    dummyval(x::Union{Number,AbstractMatrix}) = x
-    dummyval(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
-
-    startval(x::Number) = one(x)
-    startval(x::AbstractMatrix) = eye(x)
-    startval(x::Diagonal) = Diagonal(one.(diag(x)))
-    startval(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
-
-    xval(x::Union{Number,AbstractMatrix}) = x
-    xval(x::Tuple{AbstractMatrix,AbstractVector}) = x[1]
-end
+Base.eltype(::Type{ChebyshevValues{X̂}}) where {X̂<:Union{AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}} = Utils.basis_eltype(X̂)
 
 function Base.start(bv::ChebyshevValues)
     x̂ = bv.evaluationpoint
-    val = ChebUtils.dummyval(x̂)
+    val = Utils.dummy(x̂)
     return 1,val,val
 end
 function Base.next(bv::ChebyshevValues, state)
     x̂ = bv.evaluationpoint
     i,T0,T1 = state
     if i == 1
-        T0,T1 = T1,ChebUtils.startval(x̂)
+        T0,T1 = T1,Utils.one(x̂)
         return T1,(i+1,T0,T1)
     elseif i == 2
-        T0,T1 = T1,ChebUtils.xval(x̂)*T1
+        T0,T1 = T1,Utils.xval(x̂)*T1
         return T1,(i+1,T0,T1)
     else
-        T0,T1 = T1, 2*ChebUtils.xval(x̂)*T1 - T0
+        T0,T1 = T1, 2*Utils.xval(x̂)*T1 - T0
         return T1,(i+1,T0,T1)
     end
 end
