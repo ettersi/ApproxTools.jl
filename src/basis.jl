@@ -92,11 +92,12 @@ module Utils
 
     zero(::Type{T}, x::Number) where {T} = Base.zero(T)
     zero(::Type{T}, x::AbstractMatrix) where {T} = zeros(T,size(x))
+    zero(x::Diagonal) = Diagonal(zero.(diag(x)))
     zero(::Type{T}, x::Tuple{AbstractMatrix,AbstractVector}) where {T} = zeros(T,length(x[2]))
 
-    one(x::Number) = one(x)
+    one(x::Number) = Base.one(x)
     one(x::AbstractMatrix) = eye(x)
-    one(x::Diagonal) = Diagonal(one.(diag(x)))
+    one(x::Diagonal) = Diagonal(Base.one.(diag(x)))
     one(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
 
     xval(x::Union{Number,AbstractMatrix}) = x
