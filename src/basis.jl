@@ -118,12 +118,12 @@ end
 function evaluate_linear_combination(
     c::AbstractVector,
     b::Basis,
-    x::Number
+    x::Union{Number,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}},
 )
     @assert length(c) == length(b)
     bv = b(x)
-    T = promote_type(eltype(c),eltype(bv))
-    return mapreduce(p -> p[1]*p[2], +, zero(T), zip(c,bv))
+    T = promote_type(eltype(c),Utils.scalartype(eltype(bv)))
+    return mapreduce(p -> p[1]*p[2], +, Utils.zero(T,x), zip(c,bv))
 end
 
 function evaluate_linear_combination(
@@ -135,11 +135,14 @@ function evaluate_linear_combination(
     tucker(c, map((b,x)->(f->collect(b,x)*f), b,x))
 end
 
-(lc::LinearCombination{N})(x::Vararg{Union{Number,AbstractVector},N}) where {N} = lc(x)
+(lc::LinearCombination{N})(x::Vararg{Union{Number,AbstractVector,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}},N}) where {N} = lc(x)
 (lc::LinearCombination{N})(x::NTuple{N,Number}) where {N} = evaluate_linear_combination(lc.coefficients, lc.basis, x)[1]
 (lc::LinearCombination{N})(x::NTuple{N,Union{Number,AbstractVector}}) where {N} = evaluate_linear_combination(lc.coefficients, lc.basis, x)
-(lc::LinearCombination{1})(x::NTuple{1,Number}) = evaluate_linear_combination(lc.coefficients, lc.basis[1], x[1])
+(lc::LinearCombination{1})(x::NTuple{1,Number}) = evaluate_linear_combination(lc.coefficients, lc.basis[1], x[1]) # remove ambiguity
+(lc::LinearCombination{1})(x::NTuple{1,Union{Number,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}}) =
+    evaluate_linear_combination(lc.coefficients, lc.basis[1], x[1])
 (lc::LinearCombination{1})(x::NTuple{1,AbstractVector}) = lc.(x[1])
+(lc::LinearCombination{1})(M::AbstractMatrix,v::AbstractVector) = lc((M,v))
 
 
 
