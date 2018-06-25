@@ -103,7 +103,7 @@ end
     x = linspace(-1,1,11)
     monos = [one.(x), x, @.(x^2), @.(x^3), @.(x^4)]
     v = rand(length(x))
-    @test collect(b,x) ≈ hcat(chebpolys...)
+    @test collect(b,x) ≈ hcat(monos...)
     @test all(collect(b(full(Diagonal(x)))) .≈ Diagonal.(monos))
     @test all(collect(b(Diagonal(x))) .≈ Diagonal.(monos))
     @test all(collect(b(Diagonal(x),v)) .≈ Diagonal.(monos).*(v,))
