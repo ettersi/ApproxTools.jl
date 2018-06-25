@@ -77,8 +77,21 @@ end
         @test diag(@inferred(p(Diagonal(x)))) == p.(x)
         @test @inferred(p(Diagonal(x),ones(x))) == p.(x)
     end
+end
 
+@testset "generic interpolation" begin
+    using ApproxTools: interpolationpoints, interpolationtransform
+    b = (chebpoints(3), Monomial(3))
+    p = @inferred(interpolate(x->x^2,b))
+    @test p( 0.5) ≈ 0.25
 
+    @testset for n = 0:5, T = rnc((Int,Float32,Float64))
+        b = (chebpoints(n),Monomial(n))
+        a = rand(T,n)
+        @test @inferred(collect(b[2],@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(a)) ≈ a
+        A = rand(T,n,n)
+        @test @inferred(collect(b[2],@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(A)) ≈ A
+    end
 end
 
 @testset "Semiseparated" begin

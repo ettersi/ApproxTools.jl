@@ -27,6 +27,7 @@ end
 Interpolation points. See [`interpolate()`](@ref).
 """
 function interpolationpoints end
+interpolationpoints(xb::Tuple{AbstractVector,Basis}) = xb[1]
 
 """
     interpolationtransform(b::Basis, x::AbstractVector)
@@ -34,20 +35,26 @@ function interpolationpoints end
 Interpolation transform. See [`interpolate()`](@ref).
 """
 function interpolationtransform end
+interpolationtransform(xb::Tuple{AbstractVector,Basis}) = f->begin
+    x,b = xb
+    collect(b,x)\f
+end
 
 """
     interpolate(f, b::Basis) -> LinearCombination{1}
     interpolate(f, b::NTuple{N,Basis}) -> LinearCombination{N}
 """
-interpolate(f, b::Basis) = interpolate(f,(b,))
-interpolate(f, b::NTuple{N,Basis}) where {N} =
+interpolate(f, b::Union{Basis,Tuple{AbstractVector,Basis}}) = interpolate(f,(b,))
+interpolate(f, b::NTuple{N,Union{Basis,Tuple{AbstractVector,Basis}}}) where {N} =
     LinearCombination(
         tucker(
             grideval(f,interpolationpoints.(b)),
             interpolationtransform.(b)
         ),
-        b
+        stripinterpolationpoints.(b)
     )
+stripinterpolationpoints(b::Basis) = b
+stripinterpolationpoints(xb::Tuple{AbstractVector,Basis}) = xb[2]
 
 
 
