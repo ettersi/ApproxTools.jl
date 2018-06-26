@@ -99,7 +99,7 @@ module Utils
 
     zero(::Type{T}, x::Number) where {T} = Base.zero(T)
     zero(::Type{T}, x::AbstractMatrix) where {T} = zeros(T,size(x))
-    zero(x::Diagonal) = Diagonal(zero.(diag(x)))
+    zero(::Type{T}, x::Diagonal) where {T} = Diagonal(Base.zero.(diag(x)))
     zero(::Type{T}, x::Tuple{AbstractMatrix,AbstractVector}) where {T} = zeros(T,length(x[2]))
 
     one(x::Number) = Base.one(x)
