@@ -38,3 +38,11 @@ semimajor(z) = (w = abs(ijouk(z)); (w+inv(w))/2)
 Length of semi-minor axis of Bernstein ellipse through `z`.
 """
 semiminor(z) = (w = abs(ijouk(z)); (w-inv(w))/2)
+
+"""
+   radius(z)
+
+Radius `r > 1` of the circle `C` such that `jouk.(C)` passes
+through `z`.
+"""
+radius(z) = abs(ijouk(z))

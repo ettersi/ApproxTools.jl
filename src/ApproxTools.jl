@@ -15,7 +15,7 @@ include("points.jl")
 export chebpoints, equipoints
 
 include("bernstein.jl")
-export rsmo, jouk, ijouk, semimajor, semiminor
+export rsmo, jouk, ijouk, semimajor, semiminor, radius
 
 include("fnorm.jl")
 export fnorm

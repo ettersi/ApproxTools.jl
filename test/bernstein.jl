@@ -42,12 +42,16 @@
         for T in rnc(Reals)
             @inferred semimajor(one(T))
             @inferred semiminor(one(T))
+            @inferred radius(one(T))
         end
 
         @test semimajor(π) ≈ π
         @test semimajor(big(π)) ≈ big(π)
         @test semiminor(π*im) ≈ π
         @test semiminor(big(π)*im) ≈ big(π)
+        @test radius(1) ≈ 1
+        @test radius(1+1/4) ≈ 2
+        @test radius(1+1/big(4)) ≈ big(2)
     end
 
 end
