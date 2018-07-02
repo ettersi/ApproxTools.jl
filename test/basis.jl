@@ -170,3 +170,32 @@ end
         @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(A)) ≈ A
     end
 end
+
+@testset "Radial" begin
+    using ApproxTools: interpolationpoints, interpolationtransform
+
+    f = x->exp(-x^2)
+    x0 = linspace(-1,1,5)
+    b = Radial(f, x0)
+    x = linspace(-1,1,11)
+    gaussians = [f.(x.-x0) for x0 in x0]
+    @test collect(b,x) ≈ hcat(gaussians...)
+
+    bv = @inferred(b(0))
+    bvs = @inferred start(bv)
+    _,bvs = @inferred next(bv,bvs)
+    @inferred done(bv,bvs)
+
+    @testset for n = 0:5, T = rnc((Int,Float32,Float64))
+        if n == 0
+            x0 = Float64[]
+        elseif n == 1
+            x0 = Float64[0]
+        else
+            x0 = -1 .+ 2/(n-1).*(0:n-1)
+        end
+        b = @inferred(Radial(f,x0))
+        a = rand(T,n)
+        @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(a)) ≈ a
+    end
+end

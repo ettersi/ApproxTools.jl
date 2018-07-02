@@ -6,7 +6,7 @@ include("tensor.jl")
 export cartesian, tensor, grideval
 
 include("basis.jl")
-export interpolate, coeffs, basis, LinearCombination, Semiseparated, Monomial, Chebyshev, Weighted
+export interpolate, coeffs, basis, LinearCombination, Semiseparated, Monomial, Chebyshev, Weighted, Radial
 
 include("barycentric.jl")
 export Barycentric, prodpot

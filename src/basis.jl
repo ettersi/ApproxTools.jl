@@ -299,3 +299,33 @@ function Base.next(bv::WeightedValues, state)
     return ŵ*p,state
 end
 Base.done(bv::WeightedValues, state) = done(bv.values,state)
+
+
+struct Radial{F,X} <: Basis
+    func::F
+    centers::X
+end
+
+Base.length(b::Radial) = length(b.centers)
+
+interpolationpoints(b::Radial) = b.centers
+interpolationtransform(b::Radial) = interpolationtransform((b.centers,b))
+
+(b::Radial)(x̂::Number) = RadialValues{
+        typeof(b.func(zero(promote_type(eltype(b.centers),typeof(x̂))))),
+        typeof(b),typeof(x̂)
+    }(b,x̂)
+
+struct RadialValues{T,B,X̂} <: BasisValues
+    basis::B
+    evaluationpoint::X̂
+end
+Base.eltype(::Type{RadialValues{T,B,X̂}}) where {T,B,X̂<:Number} = T
+
+function Base.getindex(bv::RadialValues,i::Int)
+    b = bv.basis
+    f = b.func
+    x = b.centers
+    x̂ = bv.evaluationpoint
+    return f(x̂ - x[i])
+end
