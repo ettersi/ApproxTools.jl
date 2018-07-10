@@ -329,3 +329,50 @@ function Base.getindex(bv::RadialValues,i::Int)
     x̂ = bv.evaluationpoint
     return f(x̂ - x[i])
 end
+
+
+struct Newton{X} <: Basis
+    interpolationpoints::X
+end
+
+Base.length(b::Newton) = length(b.interpolationpoints)
+
+interpolationpoints(b::Newton) = b.interpolationpoints
+interpolationtransform(b::Newton) = f->begin
+    x = b.interpolationpoints
+    n = length(x)
+    for tidx = CartesianRange(Base.tail(size(f)))
+        for k = 2:n
+            for i = reverse(k:n)
+                f[i,tidx] = (f[i,tidx] - f[i-1,tidx])/(x[i]-x[i-k+1])
+            end
+        end
+    end
+    return f
+end
+
+(b::Newton)(x̂::Union{Number,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}) = NewtonValues(b,convert(promote_type(eltype(b.interpolationpoints),typeof(x̂)),x̂))
+(b::Newton)(M::AbstractMatrix,v::AbstractVector) = b((M,v))
+struct NewtonValues{X,X̂} <: BasisValues
+    basis::Newton{X}
+    evaluationpoint::X̂
+end
+Base.eltype(::Type{NewtonValues{X,X̂}}) where {X,X̂<:Number} = X̂
+Base.eltype(::Type{NewtonValues{X,X̂}}) where {X,X̂<:Union{AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}} = Utils.basis_eltype(X̂)
+
+function Base.start(bv::NewtonValues)
+    x̂ = bv.evaluationpoint
+    return 1,Utils.dummy(x̂)
+end
+function Base.next(bv::NewtonValues, state)
+    x = bv.basis.interpolationpoints
+    x̂ = bv.evaluationpoint
+    i,p = state
+    if i == 1
+        p = Utils.one(x̂)
+    else
+        p = Utils.xval(x̂)*p - x[i-1]*p
+    end
+    return p,(i+1,p)
+end
+Base.done(bv::NewtonValues, state) = state[1] > length(bv)

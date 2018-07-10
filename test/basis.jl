@@ -199,3 +199,36 @@ end
         @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(a)) ≈ a
     end
 end
+
+@testset "Newton" begin
+    using ApproxTools: interpolationpoints, interpolationtransform
+
+    x = linspace(-1,1,5)
+    b = Newton(x)
+    x̂ = linspace(-1,1,11)
+    bvals = [one.(x̂), (x̂.-x[1]), @.((x̂-x[1])*(x̂-x[2])), @.((x̂-x[1])*(x̂-x[2])*(x̂-x[3])), @.((x̂-x[1])*(x̂-x[2])*(x̂-x[3])*(x̂-x[4]))]
+    v = rand(length(x̂))
+    @test collect(b,x̂) ≈ hcat(bvals...)
+    @test all(collect(b(full(Diagonal(x̂)))) .≈ Diagonal.(bvals))
+    @test all(collect(b(Diagonal(x̂))) .≈ Diagonal.(bvals))
+    @test all(collect(b(Diagonal(x̂),v)) .≈ Diagonal.(bvals).*(v,))
+
+    for bv = (@inferred(b(0)), @inferred(b(zeros(2,2))), @inferred(b(zeros(2,2),zeros(2))))
+        bvs = @inferred start(bv)
+        _,bvs = @inferred next(bv,bvs)
+        @inferred done(bv,bvs)
+    end
+
+    @testset for n = 0:5, T = rnc((Float32,Float64))
+        if n == 1
+            x = T[0]
+        else
+            x = T.(linspace(-1,1,n))
+        end
+        b = @inferred(Newton(x))
+        a = rand(T,n)
+        @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(copy(a))) ≈ a
+        A = rand(T,n,n)
+        @test @inferred(collect(b,@inferred(interpolationpoints(b))))*@inferred(interpolationtransform(b)(copy(A))) ≈ A
+    end
+end
