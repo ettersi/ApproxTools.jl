@@ -41,4 +41,12 @@
         ]
     end
 
+    @testset "lejasort" begin
+        @test @inferred(lejasort(1:1)) == [1]
+        @test @inferred(lejasort(1:2)) == [1,2]
+        @test @inferred(lejasort(1:3)) == [1,3,2]
+        @test @inferred(lejasort(1:4)) == [1,4,2,3] || lejasort(1:4) == [1,4,3,2]
+        @test @inferred(lejasort(1:5)) == [1,5,3,2,4] || lejasort(1:5) == [1,5,3,4,2]
+    end
+
 end

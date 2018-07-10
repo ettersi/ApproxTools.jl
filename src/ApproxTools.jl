@@ -12,7 +12,7 @@ include("barycentric.jl")
 export Barycentric, prodpot, logpot
 
 include("points.jl")
-export chebpoints, equipoints
+export chebpoints, equipoints, lejasort
 
 include("bernstein.jl")
 export rsmo, jouk, ijouk, semimajor, semiminor, radius

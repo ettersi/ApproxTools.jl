@@ -62,3 +62,31 @@ function equipoints(n::Integer, z::AbstractVector)
             [1, mapreduce(z->-real(1/(n*π*(x-z))), +, 0, z)]
     return ApproxFun.bisectioninv.(cumsum(μ), linspace(0,1,n))::Array{Float64,1}
 end
+
+
+"""
+    lejasort(x) -> x̃
+
+Sort `x` according to Leja ordering.
+
+The returned array `x̃` satisfies `x̃[1] == x[1]` and
+
+   i = argmax_{j >= i} logprod(x̃[j],x̃[1:i-1])
+"""
+lejasort(x) = lejasort!(copy!(similar(x),x))
+function lejasort!(x)
+    T = float(real(eltype(x)))
+    for i = 2:length(x)
+        j = 0
+        val = -T(Inf)
+        for jj = i:length(x)
+            valjj = logpot(x[jj],@view(x[1:i-1]))
+            if valjj > val
+                val = valjj
+                j = jj
+            end
+        end
+        x[i],x[j] = x[j],x[i]
+    end
+    return x
+end
