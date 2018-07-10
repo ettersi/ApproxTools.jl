@@ -74,6 +74,27 @@ function prodpot(x::AbstractVector)
     return (i -> prodpot(x[i], @view x[[1:i-1; i+1:n]])).(1:n)
 end
 
+"""
+    logpot(x̂::Number,x::AbstractVector)
+
+Efficient and stable implementation of `sum(log.(abs.(x̂.-x)))`.
+"""
+function logpot(x̂::Number,x::AbstractVector)
+    T = float(real(promote_type(typeof(x̂),eltype(x))))
+    return mapreduce(xj->log(abs(x̂-xj)), +, zero(T), x)
+end
+"""
+    logpot(x::AbstractVector)
+
+Efficient and stable implementation of
+
+    [ sum(log.(abs.(x[i] - x[setdiff(1:length(x),i)]))) for i = 1:length(x) ]
+"""
+function logpot(x::AbstractVector)
+    n = length(x)
+    return (i -> logpot(x[i], @view x[[1:i-1; i+1:n]])).(1:n)
+end
+
 
 struct Barycentric{X,W,Λ} <: Basis
     interpolationpoints::X

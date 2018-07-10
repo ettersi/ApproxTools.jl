@@ -36,8 +36,8 @@
         @test LogNumber(1.0, 2.0) / LogNumber(  im,2.0) == - im * exp(0.0)
     end
 
-    @testset "prodpot" begin
-        using ApproxTools: prodpot, lognumber, logabs
+    @testset "prodpot/logpot" begin
+        using ApproxTools: lognumber, logabs
 
         testx̂(::Type{T}) where {T <: Real} = T(1)
         testx̂(::Type{T}) where {T <: Complex} = testx̂(real(T))+im
@@ -48,10 +48,12 @@
             x̂ = testx̂(T1)
             x = testx(T2)
             @test float(@inferred(prodpot(x̂,x))) ≈ prod(x̂.-x)
+            @test float(@inferred(logpot(x̂,x))) ≈ sum(log.(abs.(x̂.-x)))
         end
         @testset for T = rnc(Reals)
             x = testx(T)
             @test float.(@inferred(prodpot(x))) ≈ [prod(x[1].-x[[2,3]]), prod(x[2].-x[[1,3]]), prod(x[3].-x[[1,2]])]
+            @test float.(@inferred(logpot(x))) ≈ [sum(log.(abs.(x[1].-x[[2,3]]))), sum(log.(abs.(x[2].-x[[1,3]]))), sum(log.(abs.(x[3].-x[[1,2]])))]
         end
 
         @testset "overflow" begin

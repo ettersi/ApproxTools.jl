@@ -9,7 +9,7 @@ include("basis.jl")
 export interpolate, coeffs, basis, LinearCombination, Semiseparated, Monomial, Chebyshev, Weighted, Radial
 
 include("barycentric.jl")
-export Barycentric, prodpot
+export Barycentric, prodpot, logpot
 
 include("points.jl")
 export chebpoints, equipoints
