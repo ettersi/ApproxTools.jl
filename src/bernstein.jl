@@ -5,7 +5,8 @@ Evaluate `√(z^2-1)` with branch cut along `[-1,1]`.
 
 The function name is the abbreviation of "root of square minus one".
 """
-rsmo(z) = ifelse(!signbit(real(z)),1,-1)*sqrt(z^2-1)
+rsmo(z) = rsmo(float(z))
+rsmo(z::Union{T,Complex{T}}) where {T<:AbstractFloat} = ifelse(!signbit(real(z)),1,-1)*sqrt(z^2-1)
 
 """
     jouk(z)

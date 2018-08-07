@@ -8,6 +8,11 @@
         @test rsmo(π) ≈ rsmo(big(π))
         @test rsmo(π*im) ≈ rsmo(big(π)*im)
 
+        # Because integer types do not have a signed zero, (-im)^2 gets mapped
+        # to the second quadrant (-1+0im) instead of the third (-1-im).
+        # Make sure rsmo takes care of this case.
+        @test rsmo(-im) == rsmo(-1.0im)
+
         x = -2.0; @test rsmo(complex(x,0.0)) == rsmo(complex(x,-0.0))
         x = -1.0; @test rsmo(complex(x,0.0)) == rsmo(complex(x,-0.0))
         x =  1.0; @test rsmo(complex(x,0.0)) == rsmo(complex(x,-0.0))
