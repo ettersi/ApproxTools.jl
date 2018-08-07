@@ -21,6 +21,7 @@ jouk(z) = (z+inv(z))/2
 Inverse Joukowsky map `z ± √(z^2-1)`. If `branch == Val(true)`,
 the sign is chosen such that the result lies outside the unit
 circle, and inside the unit circle for `branch == Val{false}`.
+This function has a branch cut along `[-1,1]`.
 """
 ijouk(z) = ijouk(z,Val(true))
 ijouk(z,::Val{true}) = z + rsmo(z)
