@@ -1,7 +1,5 @@
 module ApproxTools
 
-using Compat
-
 include("tensor.jl")
 export cartesian, tensor, grideval
 

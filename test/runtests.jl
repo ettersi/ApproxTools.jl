@@ -1,9 +1,6 @@
 using ApproxTools
-if isdefined(Base, :Test) && !Base.isdeprecated(Base, :Test)
-    using Base.Test
-else
-    using Test
-end
+
+using Test
 using Compat
 
 const BitsFloats = (Float32,Float64)
