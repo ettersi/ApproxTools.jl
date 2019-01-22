@@ -4,6 +4,10 @@ end
 
 Base.length(b::Monomial) = b.n
 
+evaluationpoints(b::Monomial) = exp.(2π*im/length(b).*(0:length(b)-1))
+approxtransform(b::Monomial) = f->fft(convert(Matrix,f),1)./length(b)
+# Regarding convert(Matrix,f), see https://github.com/JuliaMath/FFTW.jl/issues/85
+
 (b::Monomial)(x̂::Union{Number,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}) = MonomialValues(b,x̂)
 (b::Monomial)(M::AbstractMatrix,v::AbstractVector) = b((M,v))
 
