@@ -21,11 +21,11 @@ export Monomial
 #
 # include("points.jl")
 # export chebpoints, equipoints, lejasort
-#
-# include("bernstein.jl")
-# export rsmo, jouk, ijouk, ijoukt, semimajor, semiminor, radius, radiust
 
 include("fnorm.jl")
 export fnorm
+
+include("bernstein.jl")
+export rsmo, jouk, ijouk, semimajor, semiminor, radius
 
 end # module

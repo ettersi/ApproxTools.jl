@@ -33,21 +33,32 @@
         for T in rnc(Reals)
             @inferred jouk(one(T))
             @inferred ijouk(one(T))
-            @inferred ijouk(one(T),Val(true))
-            @inferred ijouk(one(T),Val(false))
-            @inferred ijoukt(one(T))
-            @inferred ijoukt(one(T),Val(true))
-            @inferred ijoukt(one(T),Val(false))
+            @inferred ijouk(one(T),halfplane=Val(false),branch=Val(true))
+            @inferred ijouk(one(T),halfplane=Val(false),branch=Val(false))
+            @inferred ijouk(one(T),halfplane=Val(true),branch=Val(true))
+            @inferred ijouk(one(T),halfplane=Val(true),branch=Val(false))
         end
 
         @test jouk(ijouk(π   )) ≈ π
         @test jouk(ijouk(π*im)) ≈ π*im
         @test jouk(ijouk(big(π)   )) ≈ π
         @test jouk(ijouk(big(π)*im)) ≈ π*im
-        @test jouk(ijoukt(1/π )) ≈ 1/π
-        @test jouk(ijoukt(π*im)) ≈ π*im
-        @test jouk(ijoukt(1/big(π) )) ≈ 1/big(π)
-        @test jouk(ijoukt(big(π)*im)) ≈ π*im
+        @test jouk(ijouk(1/π ,halfplane=Val(true))) ≈ 1/π
+        @test jouk(ijouk(π*im,halfplane=Val(true))) ≈ π*im
+        @test jouk(ijouk(1/big(π) ,halfplane=Val(true))) ≈ 1/big(π)
+        @test jouk(ijouk(big(π)*im,halfplane=Val(true))) ≈ π*im
+
+        for x in LinRange(-1,1,11)
+            @test ijouk(complex(x,+0.0)) ≈ 1/ijouk(complex(x,-0.0))
+            if x != 0
+                @test ijouk(complex(1/x,+0.0), halfplane=Val(true)) ≈ 1/ijouk(complex(1/x,-0.0), halfplane=Val(true))
+            end
+        end
+
+        @test abs(ijouk(π*im)) >= 1
+        @test abs(ijouk(π*im, branch=Val(false))) <= 1
+        @test imag(ijouk(π*im, halfplane=Val(true))) >= 0
+        @test imag(ijouk(π*im, halfplane=Val(true), branch=Val(false))) <= 0
     end
 
     @testset "semi axis" begin
@@ -55,7 +66,6 @@
             @inferred semimajor(one(T))
             @inferred semiminor(one(T))
             @inferred radius(one(T))
-            @inferred radiust(one(T))
         end
 
         @test semimajor(π) ≈ π
@@ -65,10 +75,6 @@
         @test radius(1) ≈ 1
         @test radius(1+1/4) ≈ 2
         @test radius(1+1/big(4)) ≈ big(2)
-        @test radiust(1) ≈ 1
-        @test radiust(complex(1+1/4,0.0)) ≈ 2
-        @test radiust(complex(1+1/big(4),big(0))) ≈ big(2)
-        @test radiust(complex(1+1/4,-0.0)) ≈ 0.5
     end
 
 end
