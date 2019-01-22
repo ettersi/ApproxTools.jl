@@ -3,3 +3,4 @@ LinearAlgebra
 ApproxFun
 SingularIntegralEquations
 FFTW
+IterTools
