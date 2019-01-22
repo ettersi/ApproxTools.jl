@@ -2,8 +2,7 @@
     @testset "fndims" begin
         using ApproxTools: fndims
 
-        foo(::Int) = nothing
-        @test fndims(foo) == 0
+        @test fndims(one) == 1
         @test fndims(x->1) == 1
         @test fndims((x,y)->1) == 2
         @test fndims((x,y,z)->1) == 3

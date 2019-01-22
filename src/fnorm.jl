@@ -5,12 +5,20 @@ Base.@pure @generated function fndims(f)
     else
         # Function is not type-stable if fndims_via_hasmethod
         # is copied here
-        return :(fndims_via_hasmethod(f))
+        return quote
+            (d = fndims_via_hasmethod(f, Union{})) > 0 && return d
+            (d = fndims_via_hasmethod(f, Float64)) > 0 && return d
+            (d = fndims_via_hasmethod(f, ComplexF64)) > 0 && return d
+            (d = fndims_via_hasmethod(f, Float32)) > 0 && return d
+            (d = fndims_via_hasmethod(f, ComplexF32)) > 0 && return d
+            (d = fndims_via_hasmethod(f, Int)) > 0 && return d
+            throw(ArgumentError("Could not determine the dimension of function $f"))
+        end
     end
 end
-Base.@pure function fndims_via_hasmethod(f)
+Base.@pure function fndims_via_hasmethod(f,T)
     Base.Cartesian.@nexprs 10 k->begin
-        hasmethod(f, NTuple{k,Union{}}) && return k
+        hasmethod(f, NTuple{k,T}) && return k
     end
     return 0
 end
