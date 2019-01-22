@@ -1,6 +1,7 @@
 using ApproxTools
 
 using Test
+using LinearAlgebra
 
 rnc(reals::Type) = (reals,complex.(reals))
 rnc(reals::Tuple) = (reals...,complex.(reals)...)

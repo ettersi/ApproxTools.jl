@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 @testset "Basis" begin
     b = Monomial(3)
     @test collect(b,2) == 2 .^ (0:2)'

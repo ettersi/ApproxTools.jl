@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 @testset "Monomial" begin
     b = Monomial(5)
     x = collect(range(-1,stop=1,length=11))

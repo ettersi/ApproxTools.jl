@@ -1,5 +1,7 @@
 module ApproxTools
 
+using LinearAlgebra
+
 include("MatFunUtils.jl")
 
 include("tensor.jl")
