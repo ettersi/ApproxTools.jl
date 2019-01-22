@@ -1,5 +1,7 @@
 module ApproxTools
 
+include("MatFunUtils.jl")
+
 include("tensor.jl")
 export tucker, grideval
 
