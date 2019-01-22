@@ -22,8 +22,8 @@ export Monomial
 #
 # include("bernstein.jl")
 # export rsmo, jouk, ijouk, ijoukt, semimajor, semiminor, radius, radiust
-#
-# include("fnorm.jl")
-# export fnorm
+
+include("fnorm.jl")
+export fnorm
 
 end # module
