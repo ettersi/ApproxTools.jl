@@ -3,7 +3,7 @@ module ApproxTools
 using LinearAlgebra
 using FFTW
 
-include("MatFunUtils.jl")
+include("MatFun.jl")
 
 include("tensor.jl")
 export tucker, grideval
@@ -23,13 +23,8 @@ export Monomial
 include("approximate.jl")
 export approximate
 
-# include("core.jl")
-# export interpolate, coeffs, basis, LinearCombination, Semiseparated, Monomial, Chebyshev, Weighted, Radial, Newton
+include("bases/Chebyshev.jl")
+export chebpoints, Chebyshev
 
-# include("barycentric.jl")
-# export Barycentric, prodpot, logpot
-#
-# include("points.jl")
-# export chebpoints, equipoints, lejasort
 
 end # module
