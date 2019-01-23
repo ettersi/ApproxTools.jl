@@ -16,19 +16,19 @@ struct MonomialValues{X̂} <: BasisValues
     evaluationpoint::X̂
 end
 Base.eltype(::Type{MonomialValues{X̂}}) where {X̂<:Number} = typeof(zero(X̂)*zero(X̂))
-Base.eltype(::Type{MonomialValues{X̂}}) where {X̂<:Union{AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}} = MatFunUtils.basis_eltype(X̂)
+Base.eltype(::Type{MonomialValues{X̂}}) where {X̂<:Union{AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}}} = MatFun.basis_eltype(X̂)
 
-function Base.iterate(bv::MonomialValues, state=(1,MatFunUtils.dummy(bv.evaluationpoint)))
+function Base.iterate(bv::MonomialValues)
+    x̂ = bv.evaluationpoint
+    p = MatFun.one(x̂)
+    return p,(2,p)
+end
+function Base.iterate(bv::MonomialValues, state)
     x̂ = bv.evaluationpoint
     i,p = state
     i > length(bv) && return nothing
-    if i == 1
-        p = MatFunUtils.one(x̂)
-        return p,(i+1,p)
-    else
-        p = MatFunUtils.xval(x̂)*p
-        return p,(i+1,p)
-    end
+    p = MatFun.xmul(x̂)*p
+    return p,(i+1,p)
 end
 
 function Base.getindex(b::Monomial,i::Integer)

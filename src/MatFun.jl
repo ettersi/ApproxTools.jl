@@ -1,17 +1,11 @@
 """
-    module MatFunUtils
+    module MatFun
 
 Utility functions for abstracting away the differences between
 scalar and matrix types.
 """
-module MatFunUtils
+module MatFun
     using LinearAlgebra
-
-    scalartype(::Type{T}) where {T <: Number} = T
-    scalartype(::Type{T}) where {T <: AbstractArray} = eltype(T)
-
-    dummy(x::Union{Number,AbstractMatrix}) = x
-    dummy(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
 
     zero(::Type{T}, x::Number) where {T} = Base.zero(T)
     zero(::Type{T}, x::AbstractMatrix) where {T} = zeros(T,size(x))
@@ -23,8 +17,11 @@ module MatFunUtils
     one(x::Diagonal) = Diagonal(Base.one.(diag(x)))
     one(x::Tuple{AbstractMatrix,AbstractVector}) = x[2]
 
+    xmul(x::Union{Number,AbstractMatrix}) = x
+    xmul(x::Tuple{AbstractMatrix,AbstractVector}) = x[1]
+
     xval(x::Union{Number,AbstractMatrix}) = x
-    xval(x::Tuple{AbstractMatrix,AbstractVector}) = x[1]
+    xval(x::Tuple{AbstractMatrix,AbstractVector}) = x[1]*x[2]
 
     function basis_eltype(::Type{M}) where {M <: AbstractMatrix}
         # Make sure matrix type is closed under multiplication

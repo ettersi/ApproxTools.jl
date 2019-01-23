@@ -68,7 +68,7 @@ function evaluate_linear_combination(
     @assert length(c) == length(b)
     bv = b(x)
     T = promote_type(eltype(c),eltype(eltype(bv)))
-    return mapreduce(p -> p[1]*p[2], +, zip(c,bv), init=MatFunUtils.zero(T,x))
+    return mapreduce(p -> p[1]*p[2], +, zip(c,bv), init=MatFun.zero(T,x))
 end
 
 function evaluate_linear_combination(
