@@ -9,6 +9,20 @@ function Base.getindex(b::Basis,i::Integer)
     return DefaultBasisFunction(b,i)
 end
 
+"""
+    collect(b::Basis,x) -> B
+
+Evaluate `B[i,j] = b[j](x[i])`.
+"""
+function Base.collect(b::Basis,x::Union{Number,AbstractVector})
+    T = promote_type(eltype(b(one(eltype(x)))))
+    M = Matrix{T}(undef, length(x),length(b))
+    for i = 1:length(x)
+        copyto!(@view(M[i,:]), b(x[i]))
+    end
+    return M
+end
+
 abstract type BasisValues end
 Base.length(bv::BasisValues) = length(bv.basis)
 function Base.iterate(bv::BasisValues, i = 1)
@@ -23,20 +37,6 @@ struct DefaultBasisFunction{B<:Basis}
     i::Int
 end
 (bf::DefaultBasisFunction)(x̂) = nth(bf.basis(x̂),bf.i)
-
-"""
-    collect(b::Basis,x) -> B
-
-Evaluate `B[i,j] = b[j](x[i])`.
-"""
-function Base.collect(b::Basis,x::Union{Number,AbstractVector})
-    T = promote_type(eltype(b(one(eltype(x)))))
-    M = Matrix{T}(undef, length(b),length(x))
-    for j = 1:length(x)
-        copyto!(@view(M[:,j]), b(x[j]))
-    end
-    return transpose(M)
-end
 
 
 
