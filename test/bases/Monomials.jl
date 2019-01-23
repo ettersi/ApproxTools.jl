@@ -1,5 +1,5 @@
-@testset "Monomial" begin
-    b = Monomial(5)
+@testset "Monomials" begin
+    b = Monomials(5)
     x = collect(range(-1,stop=1,length=11))
     monos = [one.(x), x, @.(x^2), @.(x^3), @.(x^4)]
     v = rand(length(x))

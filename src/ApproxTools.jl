@@ -18,7 +18,7 @@ include("LinearCombinations.jl")
 export LinearCombination, coeffs, basis
 
 include("bases/Monomials.jl")
-export Monomial
+export Monomials
 
 include("approximate.jl")
 export approximate

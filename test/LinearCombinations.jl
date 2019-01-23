@@ -1,5 +1,5 @@
 @testset "Basis" begin
-    b = Monomial(3)
+    b = Monomials(3)
     @test collect(b,2) == 2 .^ (0:2)'
     @test collect(b,2:3) == [2 .^ (0:2)'; 3 .^ (0:2)']
 
@@ -20,7 +20,7 @@ end
         @testset for TC in rnc((Int,Float64))
             C = rand(TC,3)
 
-            p = @inferred(LinearCombination(C, Monomial(3)))
+            p = @inferred(LinearCombination(C, Monomials(3)))
             @test ApproxTools.GridevalStyle(p) == ApproxTools.GridevalCartesian()
             @test ndims(p) == ndims(typeof(p)) == 1
             @test @inferred(p( 1  )) ≈ sum(C)
@@ -35,8 +35,8 @@ end
         @testset for TC in rnc((Int,Float64))
             C = rand(TC,2,2)
 
-            p = @inferred(LinearCombination(C, Monomial.((2,2))))
-            @test @inferred(LinearCombination(C, Monomial(2))) == p
+            p = @inferred(LinearCombination(C, Monomials.((2,2))))
+            @test @inferred(LinearCombination(C, Monomials(2))) == p
             @test ndims(p) == ndims(typeof(p)) == 2
             @test @inferred(p( 1,1 )) ≈ sum(C)
             @test @inferred(p((1,1))) ≈ sum(C)
@@ -49,7 +49,7 @@ end
 
     @testset "mat/matvec 1d" begin
         C = rand(5)
-        p = LinearCombination(C,Monomial(length(C)))
+        p = LinearCombination(C,Monomials(length(C)))
         x = collect(range(-1,stop=1,length=11))
         @test diag(@inferred(p(Diagonal(x)))) == p.(x)
         @test @inferred(p(Diagonal(x),one.(x))) == p.(x)

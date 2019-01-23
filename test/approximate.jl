@@ -1,6 +1,6 @@
 @testset "approximate" begin
     x = [-1,1]
-    b = Monomial(2)
+    b = Monomials(2)
     @test coeffs(approximate(one, b)) ≈ [1,0]
     @test coeffs(approximate(identity, b)) ≈ [0,1]
     @test coeffs(approximate(one, (x,b))) ≈ [1,0]
