@@ -1,5 +1,6 @@
-apply(A::AbstractMatrix,B::AbstractMatrix) = A*B
-apply(f,B::AbstractMatrix) = f(B)
+apply(a,b) = apply(a,b,Val(hasmethod(*,Tuple{typeof(a),typeof(b)})))
+apply(a,b,::Val{true}) = a*b
+apply(a,b,::Val{false}) = a(b)
 
 """
     tucker(C,B)
