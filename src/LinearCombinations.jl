@@ -31,8 +31,9 @@ function Base.iterate(bv::BasisValues, i = 1)
 end
 
 abstract type BasisFunction end
+
 using IterTools
-struct DefaultBasisFunction{B<:Basis}
+struct DefaultBasisFunction{B<:Basis} <: BasisFunction
     basis::B
     i::Int
 end
@@ -77,7 +78,7 @@ function evaluate_linear_combination(
     x::NTuple{N,Union{Number,AbstractVector}}
 ) where {N}
     @assert size(c) == length.(b)
-    tucker(c, map((b,x)->(f->collect(b,x)*f), b,x))
+    tucker(c, map((b,x)->collect(b,x), b,x))
 end
 
 (lc::LinearCombination{N})(x::Vararg{Union{Number,AbstractVector,AbstractMatrix,Tuple{AbstractMatrix,AbstractVector}},N}) where {N} = lc(x)
