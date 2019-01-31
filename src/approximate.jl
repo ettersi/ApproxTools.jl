@@ -1,7 +1,19 @@
 """
-    approximate(f, S) -> p
+    approximate(f, S) -> p::LinearCombination
 
 Approximate `f` using the approximation scheme `S`.
+
+Possible approximation schemes are:
+ - Basis with associated canonical interpolation points (e.g. `S = Chebyshev(5)`).
+ - Pair of interpolation point and basis (e.g. `S = ([-1,0,1], Monomials(3))`).
+ - More to come.
+
+# Examples
+```
+coeffs(approximate(x->x^2, Monomials(3))) ≈ [0,0,1]
+coeffs(approximate(sin, ([-π,0,π],Monomials(3))) ≈ [0,0,0]
+coeffs(approximate((x1,x2)->x1*x2, Monomials(2))) ≈ [0 0; 0 1]
+```
 """
 function approximate end
 
@@ -19,11 +31,10 @@ approximate(f, S::NTuple{N,Any}) where {N} =
         basis.(S)
     )
 
-evaluationpoints(xb::Tuple{AbstractVector,Basis}) = xb[1]
-approxtransform(xb::Tuple{AbstractVector,Basis}) = f->begin
-    x,b = xb
-    collect(b,x)\f
+evaluationpoints((x,B)::Tuple{AbstractVector,Basis}) = x
+approxtransform((x,B)::Tuple{AbstractVector,Basis}) = f->begin
+    Matrix(B,x)\f
 end
 
-basis(b::Basis) = b
-basis(xb::Tuple{AbstractVector,Basis}) = xb[2]
+basis(B::Basis) = B
+basis((x,B)::Tuple{AbstractVector,Basis}) = B

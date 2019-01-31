@@ -1,9 +1,8 @@
 module ApproxTools
 
 using LinearAlgebra
+using SparseArrays
 using FFTW
-
-include("MatFun.jl")
 
 include("tensor.jl")
 export tucker, grideval
@@ -14,17 +13,30 @@ export fnorm
 include("bernstein.jl")
 export rsmo, jouk, ijouk, semimajor, semiminor, radius
 
-include("LinearCombinations.jl")
-export LinearCombination, coeffs, basis
+include("ArgumentWrappers.jl")
 
-include("bases/Monomials.jl")
-export Monomials
+include("LinearCombinations.jl")
+export LinearCombination, coeffs, basis, @evaluate
 
 include("approximate.jl")
 export approximate
 
-include("bases/Chebyshev.jl")
-export chebpoints, Chebyshev
+include("bases/Monomials.jl")
+export Monomials
 
+include("ChebyshevPoints.jl")
+export ChebyshevPoints
+
+include("bases/Chebyshev.jl")
+export Chebyshev
+
+include("bases/Poles.jl")
+export Poles
+
+include("bases/Weighted.jl")
+export Weighted
+
+# include("bases/Barycentric.jl")
+# export Barycentric, nodepoly
 
 end # module
