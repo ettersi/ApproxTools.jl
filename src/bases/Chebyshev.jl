@@ -1,7 +1,7 @@
 """
     Chebyshev(n)
 
-Basis of Chebyshev polynomials up to degree `n`. 
+Basis of Chebyshev polynomials up to degree `n`.
 """
 struct Chebyshev <: Basis
     n::Int
@@ -9,7 +9,7 @@ end
 
 Base.length(B::Chebyshev) = B.n
 
-evaluationpoints(B::Chebyshev) = chebpoints(B.n)
+evaluationpoints(B::Chebyshev) = ChebyshevPoints(B.n)
 
 fftwtype(::Type{T}) where {T <: FFTW.fftwNumber} = T
 fftwtype(::Type{T}) where {T <: Real} = Float64
