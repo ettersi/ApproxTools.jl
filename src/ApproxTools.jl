@@ -21,11 +21,14 @@ export LinearCombination, coeffs, basis, @evaluate
 include("approximate.jl")
 export approximate
 
+include("points/ChebyshevPoints.jl")
+export ChebyshevPoints
+
+include("points/Midpoints.jl")
+export Midpoints
+
 include("bases/Monomials.jl")
 export Monomials
-
-include("ChebyshevPoints.jl")
-export ChebyshevPoints
 
 include("bases/Chebyshev.jl")
 export Chebyshev
