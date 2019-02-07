@@ -59,7 +59,7 @@ grideval(f, x::Union{Number,AbstractVector}...) = grideval(f,x)
 grideval(f, x::NTuple{N,Union{Number,AbstractVector}}) where {N} = grideval(GridevalStyle(f), f, x)
 @generated grideval(::GridevalElementwise, f, x::NTuple{N,Union{Number,AbstractVector}}) where {N} =
     :(Base.Cartesian.@ncall($N,broadcast,f,i->reshape4grideval(x[i],x,i)))
-grideval(::GridevalCartesian, f, x::NTuple{N,Union{Number,AbstractVector}}) where {N} = f(x)
+grideval(::GridevalCartesian, f, x::NTuple{N,Union{Number,AbstractVector}}) where {N} = f(x...)
 
 reshape4grideval(xi::Number,x,i) = xi
 reshape4grideval(xi::AbstractVector,x,i) = reshape(xi,gridevalshape(x,i))

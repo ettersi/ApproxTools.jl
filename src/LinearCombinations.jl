@@ -33,6 +33,13 @@ function Base.Matrix(B::Basis, x::Union{Number,AbstractVector})
     return M
 end
 
+"""
+    evaltransform(B,x)
+
+Like `Matrix(B,x)`, but may return a lazy version of the transformation.
+"""
+evaltransform(B::Basis, x::Union{Number,AbstractVector}) = Matrix(B,x)
+
 struct BasisValues{B<:Basis,X}
     basis::B
     point::X
@@ -93,43 +100,42 @@ basis(c::LinearCombination) = c.basis
 Base.ndims(c::LinearCombination{N}) where {N} = N
 Base.ndims(::Type{<:LinearCombination{N}}) where {N} = N
 
+# Generic one-dimensional algorithm
 function evaluate_linear_combination(
     c::AbstractVector,
-    B::Basis,
-    x
+    (B,)::NTuple{1,Basis},
+    (x,)::NTuple{1,Any}
 )
     @assert length(c) == length(B)
     return mapreduce(((ci,bi),) -> ci*bi, +, zip(c,B|x))
 end
 
+# One-dimensional optimization
+evaluate_linear_combination(
+    c::AbstractVector,
+    B::NTuple{1,Basis},
+    (x,)::NTuple{1,AbstractVector}
+) = broadcast(x->evaluate_linear_combination(c,B,(x,)), x)
+
+# Scalar high-dimensional algorithm
 function evaluate_linear_combination(
     c::AbstractArray{<:Any,N},
     B::NTuple{N,Basis},
     x::NTuple{N,Union{Number,AbstractVector}}
 ) where {N}
     @assert size(c) == length.(B)
-    tucker(c, map((B,x)->Matrix(B,x), B,x))
+    tucker(c, map((B,x)->evaltransform(B,x), B,x))
 end
 
-
-
-# Wrap arguments into tuple
-(p::LinearCombination{N})(x::Vararg{Any,N}) where {N} = p(x)
-
-# One-dimensional case
-(p::LinearCombination{1})(x::NTuple{1,Any}) = evaluate_linear_combination(coeffs(p), basis(p)[1], x[1])
-
-# Optimisation: in one dimension, it is faster to evaluate the linear combination pointwise
-(p::LinearCombination{1})(x::NTuple{1,AbstractVector}) = p.(x[1])
-
-# Multi-dimensional case
-(p::LinearCombination{N})(x::NTuple{N,Union{Number,AbstractVector}}) where {N} = evaluate_linear_combination(coeffs(p), basis(p), x)
-
-# Unpack 1x1 array if all arguments are numbers
-(p::LinearCombination{N})(x::NTuple{N,Number}) where {N} = first(invoke(p, Tuple{NTuple{N,Union{Number,AbstractVector}}}, x))
-
 # Resolve ambiguity
-(p::LinearCombination{1})(x::NTuple{1,Number}) = first(invoke(p, Tuple{NTuple{1,Any}}, x))
+evaluate_linear_combination(
+    c::AbstractArray{<:Any,1},
+    B::NTuple{1,Basis},
+    x::NTuple{1,Number}
+) = invoke(evaluate_linear_combination, Tuple{typeof(c), typeof(B), NTuple{1,Any}}, c,B,x)
+
+(p::LinearCombination{N})(x::Vararg{Any,N}) where {N} = evaluate_linear_combination(coeffs(p), basis(p), x)
+(p::LinearCombination{N})(x::Vararg{Number,N}) where {N} = first(evaluate_linear_combination(coeffs(p), basis(p), x))
 
 
 
@@ -139,7 +145,7 @@ using MacroTools
     @evaluate expr
 
 Currently supported expressions:
- - `@evaluate p(M)*v`: Apply `p(M)` to `v` efficiently. 
+ - `@evaluate p(M)*v`: Apply `p(M)` to `v` efficiently.
 """
 macro evaluate(expr)
      @capture(expr, p_(M_)*v_) && return :(evaluate_pmtv($(esc(p)),$(esc(M)),$(esc(v))))

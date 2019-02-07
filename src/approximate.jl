@@ -32,9 +32,7 @@ approximate(f, S::NTuple{N,Any}) where {N} =
     )
 
 evaluationpoints((x,B)::Tuple{AbstractVector,Basis}) = x
-approxtransform((x,B)::Tuple{AbstractVector,Basis}) = f->begin
-    Matrix(B,x)\f
-end
+approxtransform((x,B)::Tuple{AbstractVector,Basis}) = f->Matrix(B,x)\f
 
 basis(B::Basis) = B
 basis((x,B)::Tuple{AbstractVector,Basis}) = B

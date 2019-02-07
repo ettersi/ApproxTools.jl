@@ -1,6 +1,6 @@
 struct MockCartesianFunction end
 ApproxTools.GridevalStyle(::Type{MockCartesianFunction}) = ApproxTools.GridevalCartesian()
-(::MockCartesianFunction)(x) = x
+(::MockCartesianFunction)(x...) = x
 
 
 @testset "tensor" begin
