@@ -27,7 +27,8 @@ true
         Base.Cartesian.@nexprs $N k->begin
             tmp_k = reshape(C_{k-1},(size(C_{k-1},1),prod(Base.tail(size(C_{k-1})))))
             tmp_k = apply(B[k],tmp_k)
-            C_k = reshape(transpose(tmp_k),(Base.tail(size(C_{k-1}))...,size(tmp_k,1)))
+            C_k = Array(reshape(transpose(tmp_k),(Base.tail(size(C_{k-1}))...,size(tmp_k,1))))
+            # https://github.com/JuliaLang/julia/issues/30988
         end
         return $(Symbol("C_",N))
     end
