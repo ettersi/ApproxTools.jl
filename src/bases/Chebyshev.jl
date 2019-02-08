@@ -17,12 +17,11 @@ fftwtype(::Type{T}) where {T <: Complex} = ComplexF64
 approxtransform(B::Chebyshev) = f->begin
     n = length(B)
     T = fftwtype(eltype(f))
-    n == 0 && return Array{T}(undef, size(f))
     n == 1 && return convert(Array{T},f)
     c = FFTW.r2r(f,FFTW.REDFT00,1)
-    d = (real(T)(1)/(n-1)).*(i->isodd(i) ? 1 : -1).(1:n)
+    d = inv(real(T)(n-1)).*(i->isodd(i) ? 1 : -1).(1:n)
     d[1] /= 2; d[end] /= 2
-    return Diagonal(d)*c
+    return d .* c
 end
 
 function iterate_basis(B::Chebyshev, x)
