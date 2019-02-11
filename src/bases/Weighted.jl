@@ -35,3 +35,6 @@ iterate_basis(B::Weighted, x::MatrixVectorWrapper, state) = iterate_basis(B.basi
 
 evaluate_basis(B::Weighted,i::Integer,x) = B.weight(x)*evaluate_basis(B.basis,i,x)
 evaluate_basis(B::Weighted,i::Integer,x::MatrixVectorWrapper) = evaluate_basis(B.basis,i,MatrixVectorWrapper(x.matrix,B.weight(x)))
+
+evaltransform(B::Weighted, x::Union{Number, AbstractVector}) = c -> grideval(B.weight,(x,)) .* apply(evaltransform(B.basis,x), c)
+# TODO: What about evaluate_linear_combination(c,b::NTuple{Weighted},x::NTuple{1,AbstractVector}) ? 
