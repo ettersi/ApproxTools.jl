@@ -75,6 +75,10 @@ evaluate_basis(B::Basis, i, x) = nth(B|x,i)
 struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,Basis}}
     coeffs::C
     basis::B
+    function LinearCombination{N,C,B}(coeffs,basis) where {N,C,B}
+        @assert size(coeffs) == length.(basis)
+        return new{N,C,B}(coeffs,basis)
+    end
 end
 
 """
@@ -92,7 +96,8 @@ true
 ```
 """
 function LinearCombination end
-LinearCombination(c::AbstractArray{<:Number,N},B::Basis) where {N}= LinearCombination(c,ntuple(i->B,Val(N)))
+LinearCombination(c::AbstractArray{<:Number,N},B::NTuple{N,Basis}) where {N} = LinearCombination{N,typeof(c),typeof(B)}(c,B)
+LinearCombination(c::AbstractArray{<:Number,N},B::Basis) where {N} = LinearCombination(c,ntuple(i->B,Val(N)))
 
 coeffs(c::LinearCombination) = c.coeffs
 basis(c::LinearCombination) = c.basis
