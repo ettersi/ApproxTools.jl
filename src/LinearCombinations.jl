@@ -93,7 +93,6 @@ true
 """
 function LinearCombination end
 LinearCombination(c::AbstractArray{<:Number,N},B::Basis) where {N}= LinearCombination(c,ntuple(i->B,Val(N)))
-GridevalStyle(::Type{<:LinearCombination}) = GridevalCartesian()
 
 coeffs(c::LinearCombination) = c.coeffs
 basis(c::LinearCombination) = c.basis
@@ -136,6 +135,8 @@ evaluate_linear_combination(
 
 (p::LinearCombination{N})(x::Vararg{Any,N}) where {N} = evaluate_linear_combination(coeffs(p), basis(p), x)
 (p::LinearCombination{N})(x::Vararg{Number,N}) where {N} = first(evaluate_linear_combination(coeffs(p), basis(p), x))
+
+grideval(p::LinearCombination{N}, x::NTuple{N,Any}) where {N} = p(x...)
 
 
 

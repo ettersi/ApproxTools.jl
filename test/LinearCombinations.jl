@@ -4,7 +4,6 @@
             C = rand(TC,3)
 
             p = @inferred(LinearCombination(C, Monomials(3)))
-            @test ApproxTools.GridevalStyle(p) == ApproxTools.GridevalCartesian()
             @test ndims(p) == ndims(typeof(p)) == 1
 
             @test @inferred(p(1)) ≈ sum(C)
@@ -18,7 +17,6 @@
 
             p = @inferred(LinearCombination(C, Monomials.((2,2))))
             @test @inferred(LinearCombination(C, Monomials(2))) == p
-            @test ApproxTools.GridevalStyle(p) == ApproxTools.GridevalCartesian()
             @test ndims(p) == ndims(typeof(p)) == 2
 
             @test @inferred(p(1,1)) ≈ sum(C)

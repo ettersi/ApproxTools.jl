@@ -4,8 +4,11 @@ using LinearAlgebra
 using SparseArrays
 using FFTW
 
-include("tensor.jl")
-export tucker, grideval
+include("tucker.jl")
+export tucker
+
+include("grideval.jl")
+export grideval
 
 include("fnorm.jl")
 export fnorm
