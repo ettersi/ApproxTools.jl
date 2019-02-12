@@ -13,10 +13,34 @@ julia> grideval(*, ([1,2],[3,4]))
 ```
 """
 grideval(f, x...) = grideval(f,x)
-@generated grideval(f, x::NTuple{N,Any}) where {N} =
-    :(Base.Cartesian.@ncall($N,broadcast,f,i->reshape4grideval(x[i],x,i)))
+grideval(f, x::NTuple{N,Any}) where {N} = f.(reshape4grideval(x)...)
 
-reshape4grideval(xi::Number,x,i) = xi
-reshape4grideval(xi::AbstractVector,x,i) = reshape(xi,gridevalshape(x,i))
+reshape4grideval(x::NTuple{N,Any}) where {N} = reshape4grideval_.(x, Val(N), ntuple(identity, Val(N)))
+reshape4grideval_(xi::Number,_,_) = xi
+reshape4grideval_(xi::AbstractVector,::Val{N},i) where {N} = reshape(xi,ntuple(j -> i==j ? length(xi) : 1, Val(N)))
 
-gridevalshape(x::NTuple{N,Any},i) where {N} = ntuple(j -> i == j ? length(x[i]) : 1, Val(N))
+
+
+using MacroTools
+
+struct GridFunction{N,F}
+    fun::F
+end
+GridFunction{N}(f) where {N} = GridFunction{N,typeof(f)}(f)
+
+(gf::GridFunction{N})(x::Vararg{Any,N}) where {N} = gf.fun(x...)
+grideval(gf::GridFunction{N}, x::NTuple{N,Any}) where {N} = gf.fun(reshape4grideval(x)...)
+
+cvec(x::Number) = x
+cvec(x::AbstractArray) = vec(x)
+
+macro gridfun(f)
+    @capture(f, (x_) -> body_) || error("@gridfun must be used on an anonymous function")
+    body = MacroTools.postwalk(body) do expr
+        (@capture(expr, g_(y__)) && isa(g,Expr) && g.head == :$) || return expr
+        return :($grideval($g, $cvec.(($(y...),))))
+    end
+    if isa(x, Expr) N = length(x.args)
+    else N = 1; end
+    return esc(:($GridFunction{$N}($x -> @. $body)))
+end

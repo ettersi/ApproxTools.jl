@@ -1,17 +1,14 @@
-struct MockCartesianFunction end
-ApproxTools.grideval(::MockCartesianFunction, x::NTuple{N,Any}) where {N} = x
+mutable struct MockCartesianFunction
+    called_grideval::Bool
+end
+function ApproxTools.grideval(f::MockCartesianFunction, x::NTuple{N,Any}) where {N}
+    f.called_grideval = true
+    return broadcast(*,ApproxTools.reshape4grideval(x)...)
+end
 
 @testset "grideval" begin
     a = [1,2]
     b = [1.,2.]
-
-    @test ApproxTools.gridevalshape((a,b),1) == (2,1)
-    @test ApproxTools.gridevalshape((a,b),2) == (1,2)
-    @test ApproxTools.gridevalshape((a,1),1) == (2,1)
-    @test ApproxTools.reshape4grideval(a,(a,b),1) == reshape(a,(2,1))
-    @test ApproxTools.reshape4grideval(b,(a,b),2) == reshape(b,(1,2))
-    @test ApproxTools.reshape4grideval(a,(a,1),1) == reshape(a,(2,1))
-    @test ApproxTools.reshape4grideval(1,(a,1),2) == 1
 
     @inferred grideval(*,  1 )
     @inferred grideval(*,  a )
@@ -36,5 +33,12 @@ ApproxTools.grideval(::MockCartesianFunction, x::NTuple{N,Any}) where {N} = x
     @test collect(grideval(*,  a,b )) == [1. 2.; 2. 4.]
     @test collect(grideval(*, (a,b))) == [1. 2.; 2. 4.]
 
-    @test grideval(MockCartesianFunction(), a,b) == (a,b)
+    m = MockCartesianFunction(false)
+    f = @gridfun( x -> x + $m(x) )
+    @test @inferred(grideval(f, a)) ≈ 2*a
+    @test m.called_grideval; m.called_grideval = false
+
+    f = @gridfun( (x,y) -> x + $m(x,y) )
+    @test @inferred(grideval(f, a,b)) ≈ a .+ a .*b'
+    @test m.called_grideval; m.called_grideval = false
 end

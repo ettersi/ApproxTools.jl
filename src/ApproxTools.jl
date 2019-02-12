@@ -8,7 +8,7 @@ include("tucker.jl")
 export tucker
 
 include("grideval.jl")
-export grideval
+export grideval, @gridfun
 
 include("fnorm.jl")
 export fnorm
