@@ -44,27 +44,20 @@ evaltransform(B::Chebyshev, x::ChebyshevPoints) = c->begin
     @assert length(B) == size(c,1)
     T = fftwtype(promote_type(eltype(x), eltype(c)))
 
-    defaulteval(B,x,c::AbstractVector) = broadcast(x->evaluate_linear_combination(c,(B,),(x,)), x)
-    defaulteval(B,x,c::AbstractArray) = Matrix(B,x)*c
+    nB = length(B)-1
+    nx = length(x)-1
 
-    if length(B) == 1
+    if nB == 0
         return one.(x) .* c
-    elseif length(x) == 1
-        return defaulteval(B,x,c)
-    elseif length(B) == length(x)
-        d = inv(real(T)(2)).*(i->isodd(i) ? 1 : -1).(1:length(B)); d[1] = 1; d[end] *= 2
-        return FFTW.r2r(d.*c, FFTW.REDFT00,1)
-    elseif (length(B) - 1) % (length(x) - 1) == 0
-        d = inv(real(T)(2)).*(i->isodd(i) ? 1 : -1).(1:length(B)); d[1] = 1; d[end] *= 2
-        s = (length(B) - 1) ÷ (length(x) - 1)
-        idx = ( 1:s:size(c,1), ntuple(i->1:size(c,i+1), ndims(c)-1)... )
-        return FFTW.r2r(d.*c, FFTW.REDFT00,1)[idx...]
-    elseif (length(x) - 1) % (length(B) - 1) == 0
-        d = inv(real(T)(2)).*(i->isodd(i) ? 1 : -1).(1:length(B)); d[1] = 1
-        O = zeros(eltype(c), (length(x) - length(B), Base.tail(size(c))...))
-        return FFTW.r2r([ d.*c; O ], FFTW.REDFT00,1)
+    elseif nx == 0
+        return Matrix(B,x)*c
     else
-        return defaulteval(B,x,c)
+        k = (nB+nx-1)÷nx
+        pnB = k*nx
+        O = zeros(eltype(c), (pnB - nB, Base.tail(size(c))...))
+        d = inv(real(T)(2)).*(i->isodd(i) ? 1 : -1).(1:pnB+1); d[1] = 1; d[end] *= 2
+        idx = ( 1:k:k*(nx+1), ntuple(i->1:size(c,i+1), ndims(c)-1)... )
+        return FFTW.r2r(d.*[c;O], FFTW.REDFT00,1)[idx...]
     end
 end
 
