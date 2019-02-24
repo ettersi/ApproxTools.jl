@@ -9,43 +9,34 @@ end
 Base.length(B::Weighted) = length(B.basis)
 
 evaluationpoints(B::Weighted) = evaluationpoints(B.basis)
-approxtransform(B::Weighted) = f->begin
+function approxtransform(B::Weighted, f)
     basis = B.basis
     x = evaluationpoints(basis)
     w = B.weight.(x)
-    return apply(approxtransform(basis), w.\f)
+    return approxtransform(basis, w.\f)
 end
 
 function iterate_basis(B::Weighted, x)
-    tmp = iterate_basis(B.basis, x)
-    tmp == nothing && return nothing
-    b,state = tmp
+    b,state = IterTools.@ifsomething iterate_basis(B.basis, x)
     w = B.weight(x)
     return w*b, (w,state)
 end
 function iterate_basis(B::Weighted, x, (w,state))
-    tmp = iterate_basis(B.basis, x, state)
-    tmp == nothing && return nothing
-    b,state = tmp
+    b,state = IterTools.@ifsomething iterate_basis(B.basis, x, state)
     return w*b, (w,state)
 end
 
 function iterate_basis(B::Weighted, x::MatrixVectorWrapper)
     xx = MatrixVectorWrapper(x.matrix,B.weight(x))
-    tmp = iterate_basis(B.basis, xx)
-    tmp == nothing && return nothing
-    b,state = tmp
+    b,state = IterTools.@ifsomething iterate_basis(B.basis, xx)
     return b, (xx,state)
 end
 function iterate_basis(B::Weighted, x::MatrixVectorWrapper, (xx,state))
-    tmp = iterate_basis(B.basis, xx, state)
-    tmp == nothing && return nothing
-    b,state = tmp
+    b,state = IterTools.@ifsomething iterate_basis(B.basis, xx, state)
     return b, (xx,state)
 end
 
-evaluate_basis(B::Weighted,i::Integer,x) = B.weight(x)*evaluate_basis(B.basis,i,x)
-evaluate_basis(B::Weighted,i::Integer,x::MatrixVectorWrapper) = evaluate_basis(B.basis,i,MatrixVectorWrapper(x.matrix,B.weight(x)))
+evaluate_basis(B::Weighted,i,x) = B.weight(x)*evaluate_basis(B.basis,i,x)
+evaluate_basis(B::Weighted,i,x::MatrixVectorWrapper) = evaluate_basis(B.basis,i,MatrixVectorWrapper(x.matrix,B.weight(x)))
 
-evaltransform(B::Weighted, x::Union{Number, AbstractVector}) = c -> grideval(B.weight,(x,)) .* apply(evaltransform(B.basis,x), c)
-# TODO: What about evaluate_linear_combination(c,b::NTuple{Weighted},x::NTuple{1,AbstractVector}) ?
+evaltransform(B::Weighted, x, c) = grideval(B.weight,(x,)) .* evaltransform(B.basis,x,c)

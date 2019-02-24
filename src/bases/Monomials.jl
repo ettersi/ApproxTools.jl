@@ -6,10 +6,9 @@ struct Monomials <: Basis
 end
 
 Base.length(B::Monomials) = B.n
-# Base.eltype(::Type{Monomials})
 
 evaluationpoints(B::Monomials) = exp.(2π*im/length(B).*(0:length(B)-1))
-approxtransform(B::Monomials) = f->fft(convert(Matrix,f),1)./length(B)
+approxtransform(B::Monomials,f) = fft(convert(Array,f),1)./length(B)
 
 function iterate_basis(B::Monomials, x)
     p = one(x)

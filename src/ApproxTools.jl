@@ -3,6 +3,7 @@ module ApproxTools
 using LinearAlgebra
 using SparseArrays
 using FFTW
+using IterTools
 
 include("tucker.jl")
 export tucker

@@ -17,7 +17,7 @@ collect( Monomials(4) | 2 ) == [1,2,4,8]
 """
 Base.:|(B::Basis,x) = BasisValues(B,wrap(x))
 
-function Base.getindex(B::Basis,i::Integer)
+function Base.getindex(B::Basis, i)
     @assert i in 1:length(B)
     return BasisFunction(B,i)
 end
@@ -25,7 +25,7 @@ end
 """
     Matrix(B::Basis, x) = [ B[j](x[i]) for i = 1:length(x), j = 1:length(B) ]
 """
-function Base.Matrix(B::Basis, x::Union{Number,AbstractVector})
+function Base.Matrix(B::Basis, x)
     M = Matrix{eltype(collect(B|one(eltype(x))))}(undef, length(x),length(B))
     for i = 1:length(x)
         copyto!(@view(M[i,:]), B|x[i])
@@ -34,12 +34,21 @@ function Base.Matrix(B::Basis, x::Union{Number,AbstractVector})
 end
 
 """
-    evaltransform(B,x)
+    evaltransform(B,x,c)
 
-Like `Matrix(B,x)`, but may return a lazy version of the transformation.
+Evaluate `Matrix(B,x)*c`.
 """
-evaltransform(B::Basis, x::Union{Number,AbstractVector}) = Matrix(B,x)
+evaltransform(B::Basis, x, c) = default_evaltransform(B,x,c)
+default_evaltransform(B::Basis, x, c) = Matrix(B,x)*c
+default_evaltransform(B::Basis, x, c::AbstractVector) = mapreduce(((ci,bix),) -> ci*bix, +, zip(c,B|x))
+default_evaltransform(B::Basis, x::AbstractVector{<:Number}, c::AbstractVector) = evaltransform.((B,),x,(c,))
 
+
+"""
+    BasisValues(B,x)
+
+Auxiliary type returned by `B | x`.
+"""
 struct BasisValues{B<:Basis,X}
     basis::B
     point::X
@@ -47,7 +56,6 @@ end
 
 Base.length(bx::BasisValues) = length(bx.basis)
 Base.eltype(bx::BasisValues) = typeof(first(bx))
-
 Base.iterate(bx::BasisValues, args...) = iterate_basis(bx.basis, bx.point, args...)
 
 """
@@ -56,12 +64,17 @@ Base.iterate(bx::BasisValues, args...) = iterate_basis(bx.basis, bx.point, args.
 Iterate over the functions in `B` evaluated at point `x`.
 Analogous to `Base.iterate`.
 """
-function iterate_basis(B::Basis,x, i=1)
+function iterate_basis(B::Basis, x, i=1)
     i > length(B) && return nothing
     return evaluate_basis(B,i,x), i+1
 end
 
-using IterTools
+
+"""
+    BasisFunction(B,i)
+
+Auxiliary type returned by `B[i]`.
+"""
 struct BasisFunction{B<:Basis}
     basis::B
     i::Int
@@ -96,47 +109,23 @@ true
 ```
 """
 function LinearCombination end
-LinearCombination(c::AbstractArray{<:Number,N},B::NTuple{N,Basis}) where {N} = LinearCombination{N,typeof(c),typeof(B)}(c,B)
-LinearCombination(c::AbstractArray{<:Number,N},B::Basis) where {N} = LinearCombination(c,ntuple(i->B,Val(N)))
+LinearCombination(c::AbstractArray{<:Number,N}, B::NTuple{N,Basis}) where {N} = LinearCombination{N,typeof(c),typeof(B)}(c,B)
+LinearCombination(c::AbstractArray{<:Number,N}, B::Vararg{Basis,N}) where {N} = LinearCombination(c,B)
+LinearCombination(c::AbstractArray{<:Number,N}, B::Basis) where {N} = LinearCombination(c,ntuple(i->B,Val(N)))
 
 coeffs(c::LinearCombination) = c.coeffs
 basis(c::LinearCombination) = c.basis
 Base.ndims(c::LinearCombination{N}) where {N} = N
 Base.ndims(::Type{<:LinearCombination{N}}) where {N} = N
 
-# Generic one-dimensional algorithm
-function evaluate_linear_combination(
-    c::AbstractVector,
-    (B,)::NTuple{1,Basis},
-    (x,)::NTuple{1,Any}
-)
-    @assert length(c) == length(B)
-    return mapreduce(((ci,bi),) -> ci*bi, +, zip(c,B|x))
-end
-
-# One-dimensional optimization
-evaluate_linear_combination(
-    c::AbstractVector,
-    B::NTuple{1,Basis},
-    (x,)::NTuple{1,AbstractVector}
-) = broadcast(x->evaluate_linear_combination(c,B,(x,)), x)
-
-# Scalar high-dimensional algorithm
 function evaluate_linear_combination(
     c::AbstractArray{<:Any,N},
     B::NTuple{N,Basis},
-    x::NTuple{N,Union{Number,AbstractVector}}
+    x::NTuple{N,Any}
 ) where {N}
     @assert size(c) == length.(B)
-    tucker(c, map((B,x)->evaltransform(B,x), B,x))
+    tucker(c, map((B,x)->(c->evaltransform(B,wrap(x),c)), B,x))
 end
-
-# Resolve ambiguity
-evaluate_linear_combination(
-    c::AbstractArray{<:Any,1},
-    B::NTuple{1,Basis},
-    x::NTuple{1,Number}
-) = invoke(evaluate_linear_combination, Tuple{typeof(c), typeof(B), NTuple{1,Any}}, c,B,x)
 
 (p::LinearCombination{N})(x::Vararg{Any,N}) where {N} = evaluate_linear_combination(coeffs(p), basis(p), x)
 (p::LinearCombination{N})(x::Vararg{Number,N}) where {N} = first(evaluate_linear_combination(coeffs(p), basis(p), x))

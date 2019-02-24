@@ -14,7 +14,7 @@ evaluationpoints(B::Chebyshev) = ChebyshevPoints(B.n)
 fftwtype(::Type{T}) where {T <: FFTW.fftwNumber} = T
 fftwtype(::Type{T}) where {T <: Real} = Float64
 fftwtype(::Type{T}) where {T <: Complex} = ComplexF64
-approxtransform(B::Chebyshev) = f->begin
+function approxtransform(B::Chebyshev, f)
     n = length(B)
     T = fftwtype(eltype(f))
     n == 1 && return convert(Array{T},f)
@@ -39,7 +39,7 @@ function iterate_basis(B::Chebyshev, x, (i,T0,T1))
 end
 
 # Use FFT to evaluate in Chebyshev points
-evaltransform(B::Chebyshev, x::ChebyshevPoints) = c->begin
+function evaltransform(B::Chebyshev, x::ChebyshevPoints, c)
     # Warning: this code is not tested for mixed precision / BigFloat computations
     @assert length(B) == size(c,1)
     T = fftwtype(promote_type(eltype(x), eltype(c)))
@@ -60,9 +60,3 @@ evaltransform(B::Chebyshev, x::ChebyshevPoints) = c->begin
         return FFTW.r2r(d.*[c;O], FFTW.REDFT00,1)[idx...]
     end
 end
-
-evaluate_linear_combination(
-    c::AbstractVector,
-    (B,)::NTuple{1,Chebyshev},
-    (x,)::NTuple{1,ChebyshevPoints}
-) = apply(evaltransform(B,x), c)

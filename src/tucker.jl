@@ -18,6 +18,8 @@ julia> C = rand(2,3); B = (rand(4,2),rand(5,3));
 true
 ```
 """
+function tucker end
+
 @generated function tucker(
     C::AbstractArray{<:Any,N},
     B::NTuple{N,Any}
@@ -33,3 +35,5 @@ true
         return $(Symbol("C_",N))
     end
 end
+tucker(C::AbstractArray{<:Any,1}, B::NTuple{1,Any}) = apply(B[1],C)
+tucker(C::AbstractArray{<:Any,2}, B::NTuple{2,Any}) = transpose(apply(B[2],transpose(apply(B[1],C))))
