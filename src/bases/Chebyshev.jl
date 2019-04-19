@@ -3,7 +3,7 @@
 
 Basis of Chebyshev polynomials up to degree `n`.
 """
-struct Chebyshev <: Basis
+struct Chebyshev <: AbstractBasis
     n::Int
 end
 

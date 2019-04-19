@@ -1,7 +1,7 @@
 """
     Poles(z) = [x->1/(x- z) for z in z]
 """
-struct Poles{Z} <: Basis
+struct Poles{Z} <: AbstractBasis
     poles::Z
 end
 

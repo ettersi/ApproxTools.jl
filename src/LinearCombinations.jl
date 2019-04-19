@@ -1,12 +1,12 @@
 """
-    Basis
+    AbstractBasis
 
 Abstract supertype for sets of basis functions.
 """
-abstract type Basis end
+abstract type AbstractBasis end
 
 """
-    |(B::Basis, x)
+    |(B::AbstractBasis, x)
 
 Iterate over the functions in `B` evaluated at point `x`.
 
@@ -15,17 +15,17 @@ Iterate over the functions in `B` evaluated at point `x`.
 collect( Monomials(4) | 2 ) == [1,2,4,8]
 ```
 """
-Base.:|(B::Basis,x) = BasisValues(B,wrap(x))
+Base.:|(B::AbstractBasis,x) = BasisValues(B,wrap(x))
 
-function Base.getindex(B::Basis, i)
+function Base.getindex(B::AbstractBasis, i)
     @assert i in 1:length(B)
     return BasisFunction(B,i)
 end
 
 """
-    Matrix(B::Basis, x) = [ B[j](x[i]) for i = 1:length(x), j = 1:length(B) ]
+    Matrix(B::AbstractBasis, x) = [ B[j](x[i]) for i = 1:length(x), j = 1:length(B) ]
 """
-function Base.Matrix(B::Basis, x)
+function Base.Matrix(B::AbstractBasis, x)
     M = Matrix{eltype(collect(B|one(eltype(x))))}(undef, length(x),length(B))
     for i = 1:length(x)
         copyto!(@view(M[i,:]), B|x[i])
@@ -38,10 +38,10 @@ end
 
 Evaluate `Matrix(B,x)*c`.
 """
-evaltransform(B::Basis, x, c) = default_evaltransform(B,x,c)
-default_evaltransform(B::Basis, x, c) = Matrix(B,x)*c
-default_evaltransform(B::Basis, x, c::AbstractVector) = mapreduce(((ci,bix),) -> ci*bix, +, zip(c,B|x))
-default_evaltransform(B::Basis, x::AbstractVector{<:Number}, c::AbstractVector) = evaltransform.((B,),x,(c,))
+evaltransform(B::AbstractBasis, x, c) = default_evaltransform(B,x,c)
+default_evaltransform(B::AbstractBasis, x, c) = Matrix(B,x)*c
+default_evaltransform(B::AbstractBasis, x, c::AbstractVector) = mapreduce(((ci,bix),) -> ci*bix, +, zip(c,B|x))
+default_evaltransform(B::AbstractBasis, x::AbstractVector{<:Number}, c::AbstractVector) = evaltransform.((B,),x,(c,))
 
 
 """
@@ -49,7 +49,7 @@ default_evaltransform(B::Basis, x::AbstractVector{<:Number}, c::AbstractVector) 
 
 Auxiliary type returned by `B | x`.
 """
-struct BasisValues{B<:Basis,X}
+struct BasisValues{B<:AbstractBasis,X}
     basis::B
     point::X
 end
@@ -59,12 +59,12 @@ Base.eltype(bx::BasisValues) = typeof(first(bx))
 Base.iterate(bx::BasisValues, args...) = iterate_basis(bx.basis, bx.point, args...)
 
 """
-    iterate_basis(B::Basis, x [, state])
+    iterate_basis(B::AbstractBasis, x [, state])
 
 Iterate over the functions in `B` evaluated at point `x`.
 Analogous to `Base.iterate`.
 """
-function iterate_basis(B::Basis, x, i=1)
+function iterate_basis(B::AbstractBasis, x, i=1)
     i > length(B) && return nothing
     return evaluate_basis(B,i,x), i+1
 end
@@ -75,17 +75,17 @@ end
 
 Auxiliary type returned by `B[i]`.
 """
-struct BasisFunction{B<:Basis}
+struct BasisFunction{B<:AbstractBasis}
     basis::B
     i::Int
 end
 (bf::BasisFunction)(x...) = bf(x)
 (bf::BasisFunction)(x) = evaluate_basis(bf.basis, bf.i, wrap(x))
-evaluate_basis(B::Basis, i, x) = nth(B|x,i)
+evaluate_basis(B::AbstractBasis, i, x) = nth(B|x,i)
 
 
 
-struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,Basis}}
+struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,AbstractBasis}}
     coeffs::C
     basis::B
     function LinearCombination{N,C,B}(coeffs,basis) where {N,C,B}
@@ -95,8 +95,8 @@ struct LinearCombination{N,C<:AbstractArray{<:Number,N},B<:NTuple{N,Basis}}
 end
 
 """
-    LinearCombination(c::AbstractVector, B::Basis) -> p
-    LinearCombination(c::AbstractArray{N}, B::NTuple{N,Basis}) -> p
+    LinearCombination(c::AbstractVector, B::AbstractBasis) -> p
+    LinearCombination(c::AbstractArray{N}, B::NTuple{N,AbstractBasis}) -> p
 
 Linear combination of basis functions.
 
@@ -109,9 +109,9 @@ true
 ```
 """
 function LinearCombination end
-LinearCombination(c::AbstractArray{<:Number,N}, B::NTuple{N,Basis}) where {N} = LinearCombination{N,typeof(c),typeof(B)}(c,B)
-LinearCombination(c::AbstractArray{<:Number,N}, B::Vararg{Basis,N}) where {N} = LinearCombination(c,B)
-LinearCombination(c::AbstractArray{<:Number,N}, B::Basis) where {N} = LinearCombination(c,ntuple(i->B,Val(N)))
+LinearCombination(c::AbstractArray{<:Number,N}, B::NTuple{N,AbstractBasis}) where {N} = LinearCombination{N,typeof(c),typeof(B)}(c,B)
+LinearCombination(c::AbstractArray{<:Number,N}, B::Vararg{AbstractBasis,N}) where {N} = LinearCombination(c,B)
+LinearCombination(c::AbstractArray{<:Number,N}, B::AbstractBasis) where {N} = LinearCombination(c,ntuple(i->B,Val(N)))
 
 coeffs(c::LinearCombination) = c.coeffs
 basis(c::LinearCombination) = c.basis
@@ -120,7 +120,7 @@ Base.ndims(::Type{<:LinearCombination{N}}) where {N} = N
 
 function evaluate_linear_combination(
     c::AbstractArray{<:Any,N},
-    B::NTuple{N,Basis},
+    B::NTuple{N,AbstractBasis},
     x::NTuple{N,Any}
 ) where {N}
     @assert size(c) == length.(B)

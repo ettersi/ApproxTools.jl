@@ -1,7 +1,7 @@
 """
     Monomials(n) = [ x-> x^k for k = 0:n-1 ]
 """
-struct Monomials <: Basis
+struct Monomials <: AbstractBasis
     n::Int
 end
 

@@ -1,7 +1,7 @@
 """
     ArgumentWrapper
 
-`ArgumentWrapper`s standardize the interface between `Basis` and the
+`ArgumentWrapper`s standardize the interface between `AbstractBasis` and the
 various arguments with which a basis may be evaluated.
 """
 abstract type ArgumentWrapper end
@@ -39,7 +39,7 @@ Base.:-(a::ArgumentWrapper, s::UniformScaling) = a + (-s)
 """
     MatrixWrapper(M) <: ArgumentWrapper
 
-Wrap the matrix-like object `M` as an argument to `Basis`.
+Wrap the matrix-like object `M` as an argument to `AbstractBasis`.
 """
 struct MatrixWrapper{M} <: ArgumentWrapper
     matrix::M
@@ -62,7 +62,7 @@ Base.:^(a::MatrixWrapper, p) = a.matrix^p
 """
     MatrixVectorWrapper(M,v, mv_inv = \\) <: ArgumentWrapper
 
-Wrap the matrix-vector pair `M,v` as an argument to `Basis`.
+Wrap the matrix-vector pair `M,v` as an argument to `AbstractBasis`.
 """
 struct MatrixVectorWrapper{M,V,I} <: ArgumentWrapper
     matrix::M

@@ -19,7 +19,7 @@ function approximate end
 
 # Broadcast single argument to number of dimensions
 approximate(f, S) = approximate(f, ntuple(i->S,Val(fndims(f))))
-approximate(f, S::Tuple{AbstractVector,Basis}) = invoke(approximate, Tuple{Any,Any}, f,S)
+approximate(f, S::Tuple{AbstractVector,AbstractBasis}) = invoke(approximate, Tuple{Any,Any}, f,S)
 
 # Generic algorithm for linear approximation schemes
 approximate(f, S::NTuple{N,Any}) where {N} =
@@ -31,8 +31,8 @@ approximate(f, S::NTuple{N,Any}) where {N} =
         basis.(S)
     )
 
-approxpoints((x,B)::Tuple{AbstractVector,Basis}) = x
-approxtransform((x,B)::Tuple{AbstractVector{<:Number},Basis}, f) = Matrix(B,x)\f
+approxpoints((x,B)::Tuple{AbstractVector,AbstractBasis}) = x
+approxtransform((x,B)::Tuple{AbstractVector{<:Number},AbstractBasis}, f) = Matrix(B,x)\f
 
-basis(B::Basis) = B
-basis((x,B)::Tuple{AbstractVector,Basis}) = B
+basis(B::AbstractBasis) = B
+basis((x,B)::Tuple{AbstractVector,AbstractBasis}) = B

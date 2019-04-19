@@ -1,7 +1,7 @@
 """
-    Weighted(B::Basis, w) = [ x-> w(x) * B[k](x) for k = 1:length(B)]
+    Weighted(B::AbstractBasis, w) = [ x-> w(x) * B[k](x) for k = 1:length(B)]
 """
-struct Weighted{B,W} <: Basis
+struct Weighted{B,W} <: AbstractBasis
     basis::B
     weight::W
 end
