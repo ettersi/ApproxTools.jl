@@ -25,13 +25,13 @@ approximate(f, S::Tuple{AbstractVector,Basis}) = invoke(approximate, Tuple{Any,A
 approximate(f, S::NTuple{N,Any}) where {N} =
     LinearCombination(
         tucker(
-            grideval(f,evaluationpoints.(S)),
+            grideval(f,approxpoints.(S)),
             map(Si->(f->approxtransform(Si,f)), S)
         ),
         basis.(S)
     )
 
-evaluationpoints((x,B)::Tuple{AbstractVector,Basis}) = x
+approxpoints((x,B)::Tuple{AbstractVector,Basis}) = x
 approxtransform((x,B)::Tuple{AbstractVector{<:Number},Basis}, f) = Matrix(B,x)\f
 
 basis(B::Basis) = B

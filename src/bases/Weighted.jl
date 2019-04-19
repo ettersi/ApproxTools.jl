@@ -8,10 +8,10 @@ end
 
 Base.length(B::Weighted) = length(B.basis)
 
-evaluationpoints(B::Weighted) = evaluationpoints(B.basis)
+approxpoints(B::Weighted) = approxpoints(B.basis)
 function approxtransform(B::Weighted, f)
     basis = B.basis
-    x = evaluationpoints(basis)
+    x = approxpoints(basis)
     w = B.weight.(x)
     return approxtransform(basis, w.\f)
 end

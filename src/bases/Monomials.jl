@@ -7,7 +7,7 @@ end
 
 Base.length(B::Monomials) = B.n
 
-evaluationpoints(B::Monomials) = exp.(2π*im/length(B).*(0:length(B)-1))
+approxpoints(B::Monomials) = exp.(2π*im/length(B).*(0:length(B)-1))
 approxtransform(B::Monomials,f) = fft(convert(Array,f),1)./length(B)
 
 function iterate_basis(B::Monomials, x)

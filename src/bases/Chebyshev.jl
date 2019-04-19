@@ -9,7 +9,7 @@ end
 
 Base.length(B::Chebyshev) = B.n
 
-evaluationpoints(B::Chebyshev) = ChebyshevPoints(B.n)
+approxpoints(B::Chebyshev) = ChebyshevPoints(B.n)
 
 fftwtype(::Type{T}) where {T <: FFTW.fftwNumber} = T
 fftwtype(::Type{T}) where {T <: Real} = Float64

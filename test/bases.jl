@@ -28,7 +28,7 @@ function testbasis(Bgen,fun)
             x = n > 1 ? LinRange(-1,1,n) : LinRange(0,0,1)
 
             for i = 1:n
-                if hasmethod(ApproxTools.evaluationpoints, Tuple{typeof(B)})
+                if hasmethod(ApproxTools.approxpoints, Tuple{typeof(B)})
                     @test coeffs(approximate(fun[i],B)) ≈ unit(i)
                 end
                 @test coeffs(approximate(fun[i],(x,B))) ≈ unit(i)
