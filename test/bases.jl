@@ -1,5 +1,9 @@
 function testbasis(Bgen,fun)
     @testset "evaluation" begin
+        B = Bgen(0)
+        @test length(B) == 0
+        @test iterate(B|42) == nothing
+
         for n = 1:length(fun)
             B = Bgen(n)
             for m = 1:5

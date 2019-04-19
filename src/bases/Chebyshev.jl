@@ -25,6 +25,7 @@ function approxtransform(B::Chebyshev, f)
 end
 
 function iterate_basis(B::Chebyshev, x)
+    length(B) == 0 && return nothing
     T0 = one(x)
     return T0,(2,T0,T0)
 end
