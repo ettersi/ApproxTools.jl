@@ -40,6 +40,9 @@ export Monomials
 include("bases/Chebyshev.jl")
 export Chebyshev
 
+include("bases/Combined.jl")
+export Combined
+
 include("bases/Poles.jl")
 export Poles
 
