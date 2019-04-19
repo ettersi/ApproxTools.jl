@@ -31,6 +31,9 @@ export ChebyshevPoints
 include("points/Midpoints.jl")
 export Midpoints
 
+include("bases/Basis.jl")
+export Basis
+
 include("bases/Monomials.jl")
 export Monomials
 

@@ -48,3 +48,9 @@ exp_approx = approximate(exp, Monomials(5))
     z = [2,3,4]
     testbasis(n->Poles(z[1:n]), [x->1/(x - z) for z in z])
 end
+
+# Poor man's tests
+@testset "Basis" begin
+    x = LinRange(-1,1,11)
+    @test Matrix(Basis(monomials),x) ≈ [f(x) for x in x, f in monomials]
+end
