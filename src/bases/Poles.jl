@@ -1,5 +1,5 @@
 """
-    Poles(z) = [x->1/(x- z) for z in z]
+    Poles(z) = [x->1/(x - z) for z in z]
 """
 struct Poles{Z} <: AbstractBasis
     poles::Z
