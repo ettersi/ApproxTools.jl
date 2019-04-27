@@ -66,7 +66,7 @@ Analogous to `Base.iterate`.
 """
 function iterate_basis(B::AbstractBasis, x, i=1)
     i > length(B) && return nothing
-    return evaluate_basis(B,i,x), i+1
+    return B[i](x), i+1
 end
 
 

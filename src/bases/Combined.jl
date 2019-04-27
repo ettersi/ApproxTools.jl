@@ -8,17 +8,11 @@ Combined(bases...) = Combined{typeof(bases)}(bases)
 
 Base.length(B::Combined) = mapreduce(length,+,B.bases)
 
-function iterate_basis(
-    B::Combined, x,
-    Is = (Iterators.flatten(IterTools.imap(Bi->Bi|x,B.bases)),)
-)
-    v,s = IterTools.@ifsomething iterate(Is...)
-    return v,(Is[1],s)
-end
+Base.:|(B::Combined,x) = Iterators.flatten(IterTools.imap(Bi->Bi|x,B.bases))
 
-function evaluate_basis(B::Combined,i,x)
+function Base.getindex(B::Combined,i)
     for Bi in B.bases
-        i <= length(Bi) && return evaluate_basis(Bi,i,x)
+        i <= length(Bi) && return Bi[i]
         i -= length(Bi)
     end
     throw(BoundsError(B,i))

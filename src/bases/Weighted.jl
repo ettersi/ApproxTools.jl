@@ -17,26 +17,28 @@ function approxtransform(B::Weighted, f)
 end
 
 function iterate_basis(B::Weighted, x)
-    b,state = IterTools.@ifsomething iterate_basis(B.basis, x)
+    Bx = B.basis|x
+    b,state = IterTools.@ifsomething iterate(Bx)
     w = B.weight(x)
-    return w*b, (w,state)
+    return w*b, (w,Bx,state)
 end
-function iterate_basis(B::Weighted, x, (w,state))
-    b,state = IterTools.@ifsomething iterate_basis(B.basis, x, state)
-    return w*b, (w,state)
+function iterate_basis(B::Weighted, x, (w,Bx,state))
+    b,state = IterTools.@ifsomething iterate(Bx,state)
+    return w*b, (w,Bx,state)
 end
 
 function iterate_basis(B::Weighted, x::MatrixVectorWrapper)
     xx = MatrixVectorWrapper(x.matrix,B.weight(x))
-    b,state = IterTools.@ifsomething iterate_basis(B.basis, xx)
-    return b, (xx,state)
+    Bxx = B.basis|xx
+    b,state = IterTools.@ifsomething iterate(Bxx)
+    return b, (xx,Bxx,state)
 end
-function iterate_basis(B::Weighted, x::MatrixVectorWrapper, (xx,state))
-    b,state = IterTools.@ifsomething iterate_basis(B.basis, xx, state)
-    return b, (xx,state)
+function iterate_basis(B::Weighted, x::MatrixVectorWrapper, (xx,Bxx,state))
+    b,state = IterTools.@ifsomething iterate(Bxx,state)
+    return b, (xx,Bxx,state)
 end
 
-evaluate_basis(B::Weighted,i,x) = B.weight(x)*evaluate_basis(B.basis,i,x)
-evaluate_basis(B::Weighted,i,x::MatrixVectorWrapper) = evaluate_basis(B.basis,i,MatrixVectorWrapper(x.matrix,B.weight(x)))
+evaluate_basis(B::Weighted,i,x) = B.weight(x)*B.basis[i](x)
+evaluate_basis(B::Weighted,i,x::MatrixVectorWrapper) = B.basis[i](MatrixVectorWrapper(x.matrix,B.weight(x)))
 
 evaltransform(B::Weighted, x, c) = grideval(B.weight,(x,)) .* evaltransform(B.basis,x,c)

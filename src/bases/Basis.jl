@@ -9,4 +9,4 @@ end
 
 Base.length(B::Basis) = length(B.functions)
 
-evaluate_basis(B::Basis, i, x) = B.functions[i](x)
+Base.getindex(B::Basis, i) = B.functions[i]
