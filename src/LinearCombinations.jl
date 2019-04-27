@@ -54,9 +54,9 @@ struct BasisValues{B<:AbstractBasis,X}
     point::X
 end
 
-Base.length(bx::BasisValues) = length(bx.basis)
-Base.eltype(bx::BasisValues) = typeof(first(bx))
-Base.iterate(bx::BasisValues, args...) = iterate_basis(bx.basis, bx.point, args...)
+Base.length(Bx::BasisValues) = length(Bx.basis)
+Base.eltype(Bx::BasisValues) = typeof(first(Bx))
+Base.iterate(Bx::BasisValues, args...) = iterate_basis(Bx.basis, Bx.point, args...)
 
 """
     iterate_basis(B::AbstractBasis, x [, state])
