@@ -5,6 +5,8 @@ Abstract supertype for sets of basis functions.
 """
 abstract type AbstractBasis end
 
+Base.eltype(B::AbstractBasis,x) = eltype(collect(B|x))
+
 """
     |(B::AbstractBasis, x)
 
@@ -26,7 +28,7 @@ end
     Matrix(B::AbstractBasis, x) = [ B[j](x[i]) for i = 1:length(x), j = 1:length(B) ]
 """
 function Base.Matrix(B::AbstractBasis, x)
-    M = Matrix{eltype(collect(B|one(eltype(x))))}(undef, length(x),length(B))
+    M = Matrix{eltype(B,x[1])}(undef, length(x),length(B))
     for i = 1:length(x)
         copyto!(@view(M[i,:]), B|x[i])
     end
@@ -55,7 +57,7 @@ struct BasisValues{B<:AbstractBasis,X}
 end
 
 Base.length(Bx::BasisValues) = length(Bx.basis)
-Base.eltype(Bx::BasisValues) = typeof(first(Bx))
+Base.IteratorEltype(::Type{<:BasisValues}) = Base.EltypeUnknown()
 Base.iterate(Bx::BasisValues, args...) = iterate_basis(Bx.basis, Bx.point, args...)
 
 """
