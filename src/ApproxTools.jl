@@ -30,6 +30,9 @@ export approximate
 include("points/ChebyshevPoints.jl")
 export ChebyshevPoints
 
+include("points/TrapezoidalPoints.jl")
+export TrapezoidalPoints
+
 include("points/Midpoints.jl")
 export Midpoints
 
