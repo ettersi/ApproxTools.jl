@@ -43,7 +43,7 @@ Evaluate `Matrix(B,x)*c`.
 evaltransform(B::AbstractBasis, x, c) = default_evaltransform(B,x,c)
 default_evaltransform(B::AbstractBasis, x, c) = Matrix(B,x)*c
 default_evaltransform(B::AbstractBasis, x, c::AbstractVector) = mapreduce(((ci,bix),) -> ci*bix, +, zip(c,B|x))
-default_evaltransform(B::AbstractBasis, x::AbstractVector{<:Number}, c::AbstractVector) = evaltransform.((B,),x,(c,))
+default_evaltransform(B::AbstractBasis, x::AbstractVector{<:Number}, c::AbstractVector) = evaltransform.(Ref(B),x,Ref(c))
 
 
 """
