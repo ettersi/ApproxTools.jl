@@ -21,24 +21,28 @@ end
     @test collect(grideval(*, (a,))) == [1,2]
 
     @inferred grideval(*,  1,1.0 )
+    @inferred grideval((x,y)->x*y,  b )
     @inferred grideval(*,  1,b )
     @inferred grideval(*,  a,b )
     @inferred grideval(*, (a,b))
     @test typeof(grideval(*,  1,1.0)) == Float64
+    @test eltype(grideval((x,y)->x*y, b)) == Float64
     @test eltype(grideval(*,  1,b )) == Float64
     @test eltype(grideval(*,  a,b )) == Float64
     @test eltype(grideval(*, (a,b))) == Float64
     @test grideval(*,  1,1.0 ) == 1.0
     @test collect(grideval(*,  1,b )) == [1. 2.]
+    @test collect(grideval((x,y)->x*y,  b )) == [1. 2.; 2. 4.]
     @test collect(grideval(*,  a,b )) == [1. 2.; 2. 4.]
     @test collect(grideval(*, (a,b))) == [1. 2.; 2. 4.]
 
     m = MockCartesianFunction(false)
-    f = @gridfun( x -> x + $m(x) )
+    f = let m = m; @gridfun( x -> x + $m(x) ); end
     @test @inferred(grideval(f, a)) ≈ 2*a
-    @test m.called_grideval; m.called_grideval = false
+    @test m.called_grideval
 
-    f = @gridfun( (x,y) -> x + $m(x,y) )
+    m = MockCartesianFunction(false)
+    f = let m = m; @gridfun( (x,y) -> x + $m(x,y) ); end
     @test @inferred(grideval(f, a,b)) ≈ a .+ a .*b'
-    @test m.called_grideval; m.called_grideval = false
+    @test m.called_grideval
 end
