@@ -13,25 +13,4 @@
         @test ChebyshevPoints{T}(4) ≈ T[-1,-0.5,0.5,1]
         @test ChebyshevPoints{T}(5) ≈ T[-1,-1/sqrt(T(2)),0,1/sqrt(T(2)),1]
     end
-
-    @testset "Chebyshev evaluation" begin
-        for Tc in rnc(Float64)
-            for n = 1:5
-                B = Chebyshev(n)
-                p = LinearCombination(rand(Tc,n), B)
-                for m = 1:5
-                    x = ChebyshevPoints(m)
-                    @test @inferred(p(x)) ≈ Matrix(B,x)*coeffs(p)
-                end
-            end
-            for n = 1:5
-                B = Chebyshev(n)
-                p = LinearCombination(rand(Tc,n,n), B)
-                for m = 1:5
-                    x = ChebyshevPoints(m)
-                    @test @inferred(p(x,x)) ≈ Matrix(B,x)*coeffs(p)*transpose(Matrix(B,x))
-                end
-            end
-        end
-    end
 end

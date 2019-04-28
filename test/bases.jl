@@ -87,6 +87,13 @@ end
         end
         test_approximation(B(nB), fun[1:nB])
     end
+
+    test_inferred(B(3), ChebyshevPoints(3))
+    @testset for nB = 1:length(fun)
+        @testset for nx = 1:5
+            test_values(B(nB), fun[1:nB], ChebyshevPoints(nx))
+        end
+    end
 end
 
 @testset "Weighted" begin
@@ -153,13 +160,15 @@ end
 
     test_empty(Barycentric(Float64[]))
     test_inferred(Barycentric(TrapezoidalPoints(3)),TrapezoidalPoints(3))
-    @testset for nB = 1:3
-        @testset for nx = 1:5
-            x = TrapezoidalPoints(nx)
-            test_values(Barycentric(x), fun(x), TrapezoidalPoints(nx))
-            @testset for ny = 1:nB-1
-                y = 1 .+ (1:ny)
-                test_values(Barycentric(x,y), fun(x,y), TrapezoidalPoints(nx))
+    @testset for Points in (TrapezoidalPoints,ChebyshevPoints)
+        @testset for nB = 1:3
+            @testset for nx = 1:5
+                x = Points(nx)
+                test_values(Barycentric(x), fun(x), TrapezoidalPoints(nx))
+                @testset for ny = 1:nB-1
+                    y = 1 .+ (1:ny)
+                    test_values(Barycentric(x,y), fun(x,y), TrapezoidalPoints(nx))
+                end
             end
         end
     end
