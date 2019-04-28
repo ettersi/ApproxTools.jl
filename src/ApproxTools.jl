@@ -14,6 +14,8 @@ export grideval, @gridfun
 include("fnorm.jl")
 export fnorm
 
+include("LogNumbers.jl")
+
 include("bernstein.jl")
 export rsmo, jouk, ijouk, semimajor, semiminor, radius
 
