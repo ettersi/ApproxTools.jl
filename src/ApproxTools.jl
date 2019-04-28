@@ -12,8 +12,8 @@ export tucker
 include("grideval.jl")
 export grideval, @gridfun
 
-include("fnorm.jl")
-export fnorm
+# include("fnorm.jl")
+# export fnorm
 
 include("LogNumbers.jl")
 

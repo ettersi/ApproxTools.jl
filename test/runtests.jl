@@ -11,7 +11,6 @@ rnc(reals::Tuple) = (reals...,complex.(reals)...)
 
 include("tucker.jl")
 include("grideval.jl")
-include("fnorm.jl")
 include("LogNumbers.jl")
 include("bernstein.jl")
 include("LinearCombinations.jl")
