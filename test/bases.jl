@@ -21,6 +21,14 @@ function test_values(B,fun,args...)
     @test matrix_evaltransform_2D(B,args...) ≈ ref
 end
 
+function test_inferred(B,x)
+    @inferred(Matrix(B,x))
+    @inferred(collect(B|x[1]))
+    @inferred(B[1](x[1]))
+    @inferred(ApproxTools.evaltransform(B,x,unit(length(B),1)))
+    @inferred(ApproxTools.evaltransform(B,x,Matrix(I,(length(B),length(B)))))
+end
+
 function test_matrix_eval(B,x)
     ref = Matrix(B,x)
     M = Diagonal(collect(x))
@@ -54,6 +62,7 @@ end
     B = n->Monomials(n)
 
     test_empty(B(0))
+    test_inferred(B(3), TrapezoidalPoints(3))
     @testset for nB = 1:length(fun)
         @testset for nx = 1:5
             test_values(B(nB), fun[1:nB], TrapezoidalPoints(nx))
@@ -69,6 +78,7 @@ end
     B = n->Chebyshev(n)
 
     test_empty(B(0))
+    test_inferred(B(3), TrapezoidalPoints(3))
     @testset for nB = 1:length(fun)
         @testset for nx = 1:5
             test_values(B(nB), fun[1:nB], TrapezoidalPoints(nx))
@@ -86,6 +96,7 @@ end
     B = n->Weighted(Monomials(n),exp_approx)
 
     test_empty(B(0))
+    test_inferred(B(3), TrapezoidalPoints(3))
     @testset for nB = 1:length(fun)
         @testset for nx = 1:5
             test_values(B(nB), fun[1:nB], TrapezoidalPoints(nx))
@@ -101,6 +112,7 @@ end
     B = n->Poles(z[1:n])
 
     test_empty(B(0))
+    test_inferred(B(3), TrapezoidalPoints(3))
     @testset for nB = 1:length(fun)
         @testset for nx = 1:5
             test_values(B(nB), fun[1:nB], TrapezoidalPoints(nx))
@@ -125,10 +137,12 @@ end
 @testset "Combined" begin
     monomials = [one,identity,x->x^2]
     chebyshev = [one, identity, x->2x^2-1]
+
+    test_empty(Combined(Monomials(0),Chebyshev(0)))
+    test_inferred(Combined(Monomials(3),Chebyshev(3)), TrapezoidalPoints(3))
     @testset for nx = 1:5
         test_values(Combined(Monomials(3),Chebyshev(3)), [monomials;chebyshev;], TrapezoidalPoints(nx))
         test_values(Combined(Monomials(0),Chebyshev(3)), [          chebyshev;], TrapezoidalPoints(nx))
         test_values(Combined(Monomials(3),Chebyshev(0)), [monomials;          ], TrapezoidalPoints(nx))
-        test_empty(Combined(Monomials(0),Chebyshev(0)))
     end
 end
