@@ -146,3 +146,21 @@ end
         test_values(Combined(Monomials(3),Chebyshev(0)), [monomials;          ], TrapezoidalPoints(nx))
     end
 end
+
+@testset "Barycentric" begin
+    nodepoly = (i,x,y=Float64[]) -> (x̂ -> prod(x̂.-x[[1:i-1;i+1:length(x)]])./prod(x̂.-y))
+    fun = (x,y=Float64[])->[x̂->nodepoly(i,x,y)(x̂)/nodepoly(i,x,y)(x[i]) for i = 1:length(x)]
+
+    test_empty(Barycentric(Float64[]))
+    test_inferred(Barycentric(TrapezoidalPoints(3)),TrapezoidalPoints(3))
+    @testset for nB = 1:3
+        @testset for nx = 1:5
+            x = TrapezoidalPoints(nx)
+            test_values(Barycentric(x), fun(x), TrapezoidalPoints(nx))
+            @testset for ny = 1:nB-1
+                y = 1 .+ (1:ny)
+                test_values(Barycentric(x,y), fun(x,y), TrapezoidalPoints(nx))
+            end
+        end
+    end
+end

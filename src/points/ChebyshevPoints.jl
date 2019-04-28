@@ -20,3 +20,10 @@ end
 ChebyshevPoints(n) = ChebyshevPoints{Float64}(n)
 Base.size(x::ChebyshevPoints) = size(x.data)
 Base.getindex(x::ChebyshevPoints, i::Int) = x.data[i]
+
+function prodpot(x::ChebyshevPoints)
+    T = eltype(x); n = length(x)
+    p = LogNumber.( (-1).^(0:n-1), (n-2)*log(T(2)) - log(T(n-1)) )
+    p[1] /= LogNumber(true,log(2)); p[end] /= LogNumber(true,log(2))
+    return p
+end

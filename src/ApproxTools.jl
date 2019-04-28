@@ -4,6 +4,7 @@ using LinearAlgebra
 using SparseArrays
 using FFTW
 using IterTools
+using Statistics
 
 include("tucker.jl")
 export tucker
@@ -54,7 +55,7 @@ export Poles
 include("bases/Weighted.jl")
 export Weighted
 
-# include("bases/Barycentric.jl")
-# export Barycentric, nodepoly
+include("bases/Barycentric.jl")
+export Barycentric
 
 end # module
