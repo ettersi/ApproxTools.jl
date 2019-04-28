@@ -61,20 +61,23 @@
         @test imag(ijouk(π*im, halfplane=Val(true), branch=Val(false))) <= 0
     end
 
-    @testset "semi axis" begin
+    @testset "radius & friends" begin
         for T in rnc(Reals)
+            @inferred radius(one(T))
             @inferred semimajor(one(T))
             @inferred semiminor(one(T))
-            @inferred radius(one(T))
+            @inferred bernstein_y(one(T),one(real(T)))
         end
 
+        @test radius(1) ≈ 1
+        @test radius(1+1/4) ≈ 2
+        @test radius(1+1/big(4)) ≈ big(2)
         @test semimajor(π) ≈ π
         @test semimajor(big(π)) ≈ big(π)
         @test semiminor(π*im) ≈ π
         @test semiminor(big(π)*im) ≈ big(π)
-        @test radius(1) ≈ 1
-        @test radius(1+1/4) ≈ 2
-        @test radius(1+1/big(4)) ≈ big(2)
+        @test bernstein_y(ComplexF64(π,ℯ),π) ≈ ℯ
+        @test bernstein_y(Complex{BigFloat}(π,ℯ),big(π)) ≈ big(ℯ)
     end
 
 end

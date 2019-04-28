@@ -37,6 +37,11 @@ ijouk(z,::Val{true} ,::Val{false}) = z - im*sqrt(1-z^2)
 
 
 """
+   radius(z; kwargs...) = abs(ijouk(z; kwargs...))
+"""
+radius(z; kwargs...) = abs(ijouk(z; kwargs...))
+
+"""
    semimajor(z; kwargs...)
 
 Length of semi-major axis of Bernstein ellipse through `z`.
@@ -55,6 +60,14 @@ See [`ijouk`](@ref) regardings `kwargs`.
 semiminor(z; kwargs...) = (w = abs(ijouk(z; kwargs...)); (w-inv(w))/2)
 
 """
-   radius(z; kwargs...) = abs(ijouk(z; kwargs...))
+    bernstein_y(z,x)
+
+Imaginary component of the point in the upper half-plane
+where the line `{ z | real(z) = x }` intersects the Bernstein
+ellipse through `z`.
 """
-radius(z; kwargs...) = abs(ijouk(z; kwargs...))
+function bernstein_y(z::Number,x::Real)
+    a = semimajor(z)
+    b = semiminor(z)
+    return b*sqrt(1 - (x/a)^2)
+end

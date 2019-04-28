@@ -17,7 +17,7 @@ export fnorm
 include("LogNumbers.jl")
 
 include("bernstein.jl")
-export rsmo, jouk, ijouk, semimajor, semiminor, radius
+export rsmo, jouk, ijouk, radius, semimajor, semiminor, bernstein_y
 
 include("ArgumentWrappers.jl")
 
