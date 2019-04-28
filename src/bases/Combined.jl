@@ -19,12 +19,16 @@ function Base.getindex(B::Combined,i)
 end
 
 function evaltransform(B::Combined, x, c)
-    f = Array{typeof(one(eltype(c)) * one(eltype(B|x)))}(undef, (length(x),Base.tail(size(c))...))
+    T = typeof(one(eltype(c)) * one(eltype(B,x[1])))
+    f = zeros(T, length(x), Base.tail(size(c))...)
     i = 0
     for Bi in B.bases
-        idx = ( i+(1:length(Bi)), Base.tail(Base.OneTo.(length.(B.bases)))... )
-        @views f[idx...] .= evaltransform(Bi,x,c[idx...])
-        i += length(Bi)
+        fidx = ( 1:length(x), Base.OneTo.(Base.tail(size(c)))... )
+        cidx = ( i.+(1:length(Bi)), Base.OneTo.(Base.tail(size(c)))... )
+        if all(length.(cidx) .!= 0)
+            @views f[fidx...] .+= evaltransform(Bi,x,c[cidx...])
+            i += length(Bi)
+        end
     end
     return f
 end
