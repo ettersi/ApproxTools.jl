@@ -1,4 +1,4 @@
-apply(a,b) = apply(a,b,Val(hasmethod(*,Tuple{typeof(a),typeof(b)})))
+@generated apply(a,b) = :( apply(a,b,Val( $( hasmethod(*,Tuple{a,b}) ) )) )
 apply(a,b,::Val{true}) = a*b
 apply(a,b,::Val{false}) = a(b)
 
