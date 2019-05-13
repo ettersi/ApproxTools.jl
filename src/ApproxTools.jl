@@ -17,9 +17,6 @@ export grideval, @gridfun
 
 include("LogNumbers.jl")
 
-include("bernstein.jl")
-export rsmo, jouk, ijouk, radius, semimajor, semiminor, bernstein_y
-
 include("ArgumentWrappers.jl")
 
 include("LinearCombinations.jl")
