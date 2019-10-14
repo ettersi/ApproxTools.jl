@@ -125,6 +125,7 @@ end
             test_matrix_eval(B(nB), TrapezoidalPoints(nx))
             test_matvec_eval(B(nB), TrapezoidalPoints(nx))
         end
+        test_approximation(B(nB), fun[1:nB])
     end
 end
 
