@@ -40,6 +40,9 @@ export Basis
 include("bases/Monomials.jl")
 export Monomials
 
+include("bases/NegativeMonomials.jl")
+export NegativeMonomials
+
 include("bases/Chebyshev.jl")
 export Chebyshev
 

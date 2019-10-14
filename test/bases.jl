@@ -73,6 +73,21 @@ end
     end
 end
 
+@testset "NegativeMonomials" begin
+    fun = [x->x^-k for k = 1:6]
+    B = n->NegativeMonomials(n)
+
+    test_empty(B(0))
+    test_inferred(B(4), TrapezoidalPoints(4))
+    @testset for nB = 1:length(fun)
+        @testset for nx = 2:2:6
+            test_values(B(nB), fun[1:nB], TrapezoidalPoints(nx))
+            test_matrix_eval(B(nB), TrapezoidalPoints(nx))
+            test_matvec_eval(B(nB), TrapezoidalPoints(nx))
+        end
+    end
+end
+
 @testset "Chebyshev" begin
     fun = [one, identity, x->2x^2-1, x->4x^3-3x, x->8x^4-8x^2+1]
     B = n->Chebyshev(n)
