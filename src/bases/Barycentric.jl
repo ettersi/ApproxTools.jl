@@ -55,12 +55,18 @@ function baryfactor(x̂,x,w)
     return 0,fac
 end
 
+"""
+    Barycentric(x, y = nothing, w = baryweights(x,y))
+
+Barycentric basis for rational interpolation with interpolation points `x` and poles `y`.
+
+If `isnothing(y)`, rational interpolation reduced to polynomial interpolation.
+"""
 struct Barycentric{X,Y,W} <: AbstractBasis
     points::X
     poles::Y
     weights::W
 end
-
 Barycentric(x, y = nothing) = Barycentric(x,y, baryweights(x,y))
 
 Base.length(B::Barycentric) = length(B.points)
