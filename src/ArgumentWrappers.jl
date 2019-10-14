@@ -34,6 +34,7 @@ val(x) = x
 Base.:+(s::UniformScaling, a::ArgumentWrapper) = a + s
 Base.:-(a::ArgumentWrapper, s::UniformScaling) = a + (-s)
 
+Base.Broadcast.broadcastable(a::ArgumentWrapper) = Ref(a)
 
 
 """
