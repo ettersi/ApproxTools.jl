@@ -129,6 +129,25 @@ end
     end
 end
 
+@testset "Mapped" begin
+    monomials = [one,identity,x->x^2,x->x^3,x->x^4]
+    x2x̂ = x->x+2I
+    x̂2x = x̂->x̂-2I
+    fun = [x->p(x2x̂(x)) for p in monomials]
+    B = n->Mapped(Monomials(n),x2x̂,x̂2x)
+
+    test_empty(B(0))
+    test_inferred(B(3), TrapezoidalPoints(3))
+    @testset for nB = 1:length(fun)
+        @testset for nx = 1:5
+            test_values(B(nB), fun[1:nB], TrapezoidalPoints(nx))
+            test_matrix_eval(B(nB), TrapezoidalPoints(nx))
+            test_matvec_eval(B(nB), TrapezoidalPoints(nx))
+        end
+        test_approximation(B(nB), fun[1:nB])
+    end
+end
+
 @testset "Poles" begin
     z = [2,3,4]
     fun = [x->1/(x - z) for z in z]

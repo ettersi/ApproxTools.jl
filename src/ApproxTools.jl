@@ -55,6 +55,9 @@ export Poles
 include("bases/Weighted.jl")
 export Weighted
 
+include("bases/Mapped.jl")
+export Mapped
+
 include("bases/Barycentric.jl")
 export Barycentric
 
