@@ -54,6 +54,7 @@ val(a::MatrixWrapper) = a.matrix
 
 Base.:+(a::MatrixWrapper, s::UniformScaling) = MatrixWrapper(a.matrix + s)
 Base.:*(a::MatrixWrapper, b) = a.matrix*b
+Base.:\(a::MatrixWrapper, b) = a.matrix\b
 Base.inv(a::MatrixWrapper) = inv(a.matrix)
 Base.:^(a::MatrixWrapper, p) = a.matrix^p
 
@@ -78,11 +79,15 @@ val(a::MatrixVectorWrapper) = a.matrix*a.vector
 
 Base.:+(a::MatrixVectorWrapper, s::UniformScaling) = MatrixVectorWrapper(a.matrix + s, a.vector)
 Base.:*(a::MatrixVectorWrapper, b) = a.matrix*b
+Base.:\(a::MatrixVectorWrapper, b) = a.matrix\b
 Base.inv(a::MatrixVectorWrapper) = a.mv_inv(a.matrix,a.vector)
 function Base.:^(a::MatrixVectorWrapper, p::Integer)
     m,v = a.matrix, a.vector
     for i = 1:p
         v = m*v
+    end
+    for i = 1:-p
+        v = m\v
     end
     return v
 end
