@@ -1,7 +1,7 @@
 """
     Basis(f)
 
-Turn the vector of functions `f` into a basis.
+Turn the collection of functions `f` into a basis.
 """
 struct Basis{F} <: AbstractBasis
     functions::F
