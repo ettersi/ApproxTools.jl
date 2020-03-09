@@ -22,6 +22,9 @@ export LinearCombination, coeffs, basis, @evaluate
 include("approximate.jl")
 export approximate
 
+include("inner_products.jl")
+export WeightedL2, L2, evalpoints
+
 include("points/ChebyshevPoints.jl")
 export ChebyshevPoints
 
