@@ -1,17 +1,11 @@
 abstract type InnerProduct end
 
-LinearAlgebra.norm(f, p::InnerProduct) = norm(dot_arg(f,evalpoints(p)), p)
-LinearAlgebra.norm(fx::AbstractVector{<:Number}, p::InnerProduct) = sqrt(dot(fx,fx,p))
+dot_arg(f,p) = evaluate(f,p)
+dot_arg(f::AbstractArray,p) = [f(x) for x in evalpoints(p), f in f]
+dot_arg(f::AbstractBasis,p) = Matrix(f,evalpoints(p))
 
-dot_arg(f,x) = f.(x)
-dot_arg(f::AbstractArray{<:Number},x) = f
-dot_arg(f::AbstractArray,x) = [f(x) for x in x, f in f]
-dot_arg(f::AbstractBasis,x) = Matrix(f,x)
-
-function LinearAlgebra.dot(f,g,p::InnerProduct)
-    fx,gx = dot_arg.((f,g),Ref(evalpoints(p)))
-    return dot(fx,gx,p)
-end
+LinearAlgebra.norm(f, p::InnerProduct) = norm(dot_arg(f,p), p)
+LinearAlgebra.dot(f,g,p::InnerProduct) = dot(dot_arg.((f,g),Ref(p))...,p)
 
 """
     WeightedL2(x,w) <: InnerProduct
@@ -28,10 +22,14 @@ struct WeightedL2{X,W} <: InnerProduct
 end
 
 evalpoints(p::WeightedL2) = p.points
+evaluate(f,p::WeightedL2) = f.(evalpoints(p))
+dot_arg(f::AbstractArray{<:Number},p::WeightedL2) = f
+
+LinearAlgebra.norm(f::AbstractVecOrMat{<:Number}, p::WeightedL2) = sqrt(dot(f,f,p))
 
 function LinearAlgebra.dot(
-    f::Union{AbstractVector{<:Number},AbstractMatrix{<:Number}},
-    g::Union{AbstractVector{<:Number},AbstractMatrix{<:Number}},
+    f::AbstractVecOrMat{<:Number},
+    g::AbstractVecOrMat{<:Number},
     p::WeightedL2
 )
     w = p.weights
