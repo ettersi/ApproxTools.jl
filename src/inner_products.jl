@@ -41,4 +41,5 @@ end
 
 using FastGaussQuadrature
 
-L2(n) = WeightedL2(gausslegendre(n)...)
+LegendreInnerProduct(n) = WeightedL2(gausslegendre(n)...)
+JacobiInnerProduct(n,a,b) = WeightedL2(gaussjacobi(n,a,b)...)

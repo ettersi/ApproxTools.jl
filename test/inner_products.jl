@@ -2,7 +2,7 @@ using LinearAlgebra
 
 @testset "inner products" begin
     q = [ x->1/sqrt(2), x->x*sqrt(3/2), x->(3x^2-1)*sqrt(5/8), x->(5x^3-3x)*sqrt(7/8) ]
-    p = L2(length(q))
+    p = LegendreInnerProduct(length(q))
     x = evalpoints(p)
     B = Basis(q)
     Q = [q(x) for x in x, q in q]
