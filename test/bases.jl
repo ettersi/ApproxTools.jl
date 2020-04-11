@@ -208,3 +208,18 @@ end
         end
     end
 end
+
+@testset "LanczosBasis" begin
+    fun = [ x->1/sqrt(2), x->x*sqrt(3/2), x->(3x^2-1)*sqrt(5/8), x->(5x^3-3x)*sqrt(7/8) ]
+    B = n->LanczosBasis(n)
+
+    test_empty(B(0))
+    test_inferred(B(3), TrapezoidalPoints(3))
+    @testset for nB = 1:length(fun)
+        @testset for nx = 1:4
+            test_values(B(nB), fun[1:nB], TrapezoidalPoints(nx))
+            # test_matrix_eval(B(nB), TrapezoidalPoints(nx))
+            # test_matvec_eval(B(nB), TrapezoidalPoints(nx))
+        end
+    end
+end

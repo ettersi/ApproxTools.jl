@@ -61,4 +61,7 @@ export Mapped
 include("bases/Barycentric.jl")
 export Barycentric
 
+include("bases/LanczosBasis.jl")
+export LanczosBasis
+
 end # module
