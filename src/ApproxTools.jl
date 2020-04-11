@@ -23,7 +23,7 @@ include("approximate.jl")
 export approximate
 
 include("inner_products.jl")
-export WeightedL2, L2, evalpoints
+export WeightedL2, L2, evaluate, evalpoints
 
 include("points/ChebyshevPoints.jl")
 export ChebyshevPoints

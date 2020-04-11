@@ -8,14 +8,14 @@ using LinearAlgebra
     Q = [q(x) for x in x, q in q]
 
     for i = 1:length(q)
-        @test norm(q[i]    ,p) ≈ 1
-        @test norm(q[i].(x),p) ≈ 1
+        @test @inferred(norm(q[i]    ,p)) ≈ 1
+        @test @inferred(norm(q[i].(x),p)) ≈ 1
     end
     for i = 1:length(q), j = 1:length(q)
-        @test abs(dot(q[i]  ,q[j]  ,p) - I[i,j]) <= sqrt(eps())
-        @test abs(dot(Q[:,i],q[j]  ,p) - I[i,j]) <= sqrt(eps())
-        @test abs(dot(q[i]  ,Q[:,j],p) - I[i,j]) <= sqrt(eps())
-        @test abs(dot(Q[:,i],Q[:,j],p) - I[i,j]) <= sqrt(eps())
+        @test abs(@inferred(dot(q[i]  ,q[j]  ,p)) - I[i,j]) <= sqrt(eps())
+        @test abs(@inferred(dot(Q[:,i],q[j]  ,p)) - I[i,j]) <= sqrt(eps())
+        @test abs(@inferred(dot(q[i]  ,Q[:,j],p)) - I[i,j]) <= sqrt(eps())
+        @test abs(@inferred(dot(Q[:,i],Q[:,j],p)) - I[i,j]) <= sqrt(eps())
     end
     for i = 1:length(q)
         e = zeros(length(q)); e[i] = 1
